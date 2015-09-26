@@ -114,6 +114,9 @@ $app->put('/user/register', function(Request $req) {
 	
 	$login = new Login();
 	$login->email		= $req->get('email');
+	$login->fname		= $req->get('fname');
+	$login->lname		= $req->get('lname');
+	$login->phone		= $req->get('phone');
 	$login->password	= password_hash($req->get('password'), PASSWORD_BCRYPT);
 	
 	$login->save();
