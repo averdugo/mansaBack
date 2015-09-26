@@ -35,22 +35,36 @@ $app->register(new Silex\Provider\SessionServiceProvider());
 
 $app['capsule'];
 
-
-class Login extends Illuminate\Database\Eloquent\Model
+class Model extends Illuminate\Database\Eloquent\Model
 {
 	/**
 	 * The attributes that should be hidden for arrays.
 	 *
 	 * @var array
 	 */
-	protected $hidden = ['password'];
+	protected $hidden = ['created_at', 'updated_at', 'deleted_at'];
 }
 
-class Store extends Illuminate\Database\Eloquent\Model
+class Login extends Model
+{
+	/**
+	 * The attributes that should be hidden for arrays.
+	 *
+	 * @var array
+	 */
+	protected $hidden = ['password', 'created_at', 'updated_at', 'deleted_at'];
+	
+	public function stores()
+	{
+		return $this->hasMany('Store');
+	}
+}
+
+class Store extends Model
 {
 }
 
-class Cupon extends Illuminate\Database\Eloquent\Model
+class Cupon extends Model
 {
 }
 
