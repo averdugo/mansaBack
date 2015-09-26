@@ -33,7 +33,6 @@ class CreateTableLogin extends AbstractMigration
                         ->addColumn('phone', 'string', ['limit' => 42])
                         ->addColumn('password', 'string', ['limit' => 128])
                         ->addColumn('email', 'string', ['limit' => 128])
-                        ->addColumn('birth', 'date')
                         ->addColumn('created_at', 'datetime')
                         ->addColumn('updated_at', 'datetime')
                         ->addColumn('deleted_at', 'datetime')
