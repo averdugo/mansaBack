@@ -66,6 +66,10 @@ class Store extends Model
 
 class Cupon extends Model
 {
+	public function store()
+	{
+		return $this->belongsTo('Store');
+	}
 }
 
 //handling CORS preflight request
@@ -193,6 +197,11 @@ $app->put('/cupon', function(Application $app, Request $req) {
 	return $cupon->toJSON();
 });
 
+$app->get('/cupon', function(Application $app) {
+	
+	$cupons = Cupon::with('store')->get();
+	return $cupons->toJSON();
+});
 
 $app->error(function (\Exception $e, $code) use ($app) {
 	return new JsonResponse([
