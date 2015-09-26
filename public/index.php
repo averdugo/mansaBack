@@ -7,11 +7,6 @@ use Symfony\Component\Yaml\Yaml;
 
 use Silex\Application;
 
-use App\Model\Login;
-use App\Model\Store;
-use App\Model\Cupon;
-
-
 require_once __DIR__ . '/../vendor/autoload.php';
 
 
@@ -36,6 +31,10 @@ $app->register(
 );
 
 $app->register(new Silex\Provider\SessionServiceProvider());
+
+$app->mount('/user', new App\Controller\Login);
+$app->mount('/store', new App\Controller\Store);
+$app->mount('/cupon', new App\Controller\Cupon);
 
 $app['capsule'];
 
@@ -74,101 +73,6 @@ $app->before(function(Request $req) {
 		);
 	}
 	
-});
-
-/******************************************************************************/
-/*  User Controller                                                           */
-/*                                                                            */
-/* Manage Users and Sessions ... Maybe separate sessions out later?           */
-/*                                                                            */
-/******************************************************************************/
-$app->put('/user/register', function(Request $req) {
-	
-	$login = new Login();
-	$login->email		= $req->get('email');
-	$login->fname		= $req->get('fname');
-	$login->lname		= $req->get('lname');
-	$login->phone		= $req->get('phone');
-	$login->password	= password_hash($req->get('password'), PASSWORD_BCRYPT);
-	
-	$login->save();
-	return $login->toJSON();
-});
-
-$app->post('/user/login', function(Application $app, Request $req) {
-	
-	$login = Login::where('email', '=', $req->get('email'))
-		->with('stores')
-		->first();
-	
-	$rc = password_verify($req->get('password'), $login->password);
-	if ($rc)
-	{
-		$app['session']->set('user_id', $login->id);
-		return $login->toJSON();
-	}
-	
-	throw new Exception('Unable to Login');
-});
-
-$app->get('/user/current', function(Application $app) {
-	return json_encode(['user_id' => $app['session']->get('user_id')]);
-});
-
-$app->post('/user/logout', function(Application $app, Request $req) {
-	
-	$app['session']->remove('user_id');
-	return json_encode(['is_logged_out' => true]);
-});
-
-/******************************************************************************/
-/*  Store Controller                                                          */
-/*                                                                            */
-/* Lets open a Speak Easy, Bitch! Time for women and booze, Sheen Style!      */
-/*                                                                            */
-/******************************************************************************/
-$app->put('/store', function(Application $app, Request $req) {
-	
-	$store = new Store;
-	$store->login_id = $app['session']->get('user_id');
-	$store->address = $req->get('address');
-	$store->comuna = $req->get('comuna');
-	$store->region = $req->get('region');
-	$store->save();
-	
-	return $store->toJSON();
-});
-
-$app->get('/store', function(Application $app) {
-	
-	$stores = Store::where('login_id', '=', $app['session']->get('user_id'))
-		->get();
-	
-	return $stores->toJSON();
-});
-
-/******************************************************************************/
-/*  Cupon Controller                                                          */
-/*                                                                            */
-/* Blow at Half Price! Going, Going... GONE!!!                                */
-/*                                                                            */
-/******************************************************************************/
-$app->put('/cupon', function(Application $app, Request $req) {
-	
-	$cupon = new Cupon;
-	$cupon->store_id = $req->get('store_id');
-	$cupon->label = $req->get('label');
-	$cupon->drink = $req->get('drink');
-	$cupon->price = $req->get('price');
-	$cupon->save();
-	
-	return $cupon->toJSON();
-});
-
-$app->get('/cupon', function(Application $app) {
-	
-	$cupons = Cupon::with('store')->get();
-	return $cupons->toJSON();
 });
 
 $app->error(function (\Exception $e, $code) use ($app) {
