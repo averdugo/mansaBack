@@ -126,15 +126,17 @@ $app->put('/user/register', function(Request $req) {
 $app->post('/user/login', function(Application $app, Request $req) {
 	
 	$login = Login::where('email', '=', $req->get('email'))
+		->with('stores')
 		->first();
 	
 	$rc = password_verify($req->get('password'), $login->password);
 	if ($rc)
 	{
 		$app['session']->set('user_id', $login->id);
+		return $login->toJSON();
 	}
 	
-	return json_encode(['is_logged_in' => $rc]);
+	throw new Exception('Unable to Login');
 });
 
 $app->get('/user/current', function(Application $app) {
