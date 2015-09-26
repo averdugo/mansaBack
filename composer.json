@@ -1,0 +1,8 @@
+{
+	"require": {
+		"silex/silex": "~1.3",
+		"bitolaco/silex-eloquent": "0.1.1",
+		"robmorgan/phinx": "0.4.6",
+		"symfony/yaml": "2.7.*"
+	}
+}
