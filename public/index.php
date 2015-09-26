@@ -69,7 +69,6 @@ class Cupon extends Model
 }
 
 //handling CORS preflight request
-/*
 $app->before(function (Request $request) {
 	if ($request->getMethod() === "OPTIONS") {
 		$response = new Response();
@@ -77,14 +76,19 @@ $app->before(function (Request $request) {
 		$response->headers->set("Access-Control-Allow-Methods","GET,POST,PUT,DELETE,OPTIONS");
 		$response->headers->set("Access-Control-Allow-Headers","Content-Type");
 		$response->setStatusCode(200);
-		return $response->send();
+		return $response;
 	}
 }, Application::EARLY_EVENT);
-*/
+
 
 //handling CORS respons with right headers
 $app->after(function (Request $req, Response $res) {
 	$res->headers->set("Content-Type","application/json");
+	if ($req->getMethod() != "OPTIONS")
+	{
+		$res->headers->set("Access-Control-Allow-Origin","*");
+		$res->headers->set("Access-Control-Allow-Methods","GET,POST,PUT,DELETE,OPTIONS");
+	}
 });
 
 $app->before(function(Request $req) {
