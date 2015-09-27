@@ -11,7 +11,14 @@ require_once __DIR__ . '/../vendor/autoload.php';
 
 
 $phinx = Yaml::parse(file_get_contents(__DIR__ . '/../phinx.yml'));
-$database = $phinx['environments']['development'];
+if (isset($_ENV['ENVIRONMENT']))
+{
+	$database = @$phinx['environments'][$_ENV['ENVIRONMENT']];
+}
+else
+{
+	$database = @$phinx['environments']['default_database'];
+}
 
 
 $app = new Application;
