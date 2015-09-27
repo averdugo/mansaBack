@@ -40,6 +40,6 @@ class CreateTableStores extends AbstractMigration
                         ->addColumn('deleted_at', 'datetime')
                         ->addForeignKey('login_id', 'logins', 'id',
                                 ['delete'=> 'NO_ACTION', 'update'=> 'NO_ACTION'])
-                ->save();
+                ->create();
         }
 }

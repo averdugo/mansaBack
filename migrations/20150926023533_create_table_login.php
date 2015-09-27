@@ -36,6 +36,6 @@ class CreateTableLogin extends AbstractMigration
                         ->addColumn('created_at', 'datetime')
                         ->addColumn('updated_at', 'datetime')
                         ->addColumn('deleted_at', 'datetime')
-                ->save();
+                ->create();
         }
 }

@@ -37,6 +37,6 @@ class CreateTableCupon extends AbstractMigration
                         ->addColumn('deleted_at', 'datetime')
                         ->addForeignKey('store_id', 'stores', 'id',
                                 ['delete'=> 'NO_ACTION', 'update'=> 'NO_ACTION'])
-                ->save();
+                ->create();
         }
 }
