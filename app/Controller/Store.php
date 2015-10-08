@@ -52,12 +52,47 @@ class Store implements ControllerProviderInterface
 			return $store->toJSON();
 		});
 		
-		$controller->get('/', function(Application $app) {
+		$controller->get('/', function(Application $app, Request $req) {
 			
-			$user_id = $app['session']->get('user_id');
-			$stores = Model\Store::where('login_id', '=', $user_id)
-				->get();
+			if ($req->get('lat') && $lon = $req->get('lon') && $req->get('maxdist'))
+			{
+				$db = $app['capsule']->connection();
+				
+				$geo = (object)[
+					'lat'		=> $req->get('lat'),
+					'lon'		=> $req->get('lon'),
+					'distance'	=> $req->get('maxdist')
+				];
+				
+				foreach ($geo as $key => $val)
+				{
+					if (!is_numeric($val))
+					{
+						throw new \Exception('invalid value: '.$key);
+					}
+				}
+				
+				$query = Model\Store::select('*')
+					->addSelect(
+						$db->raw('ST_Distance('.
+							'location::geometry'.
+							", ST_GeographyFromText('SRID=4326;POINT({$geo->lat} {$geo->lon})')) ".
+							"as distance"
+						)
+					)
+					->whereRaw(
+						"ST_DWithin(location, ST_GeographyFromText(?), ?)",
+						["SRID=4326;POINT({$geo->lat} {$geo->lon})", $geo->distance]
+					);
+			}
+			else
+			{
+				$user_id = $app['session']->get('user_id');
+				$query = Model\Store::where('login_id', '=', $user_id);
+			}
 			
+			
+			$stores = $query->get();
 			return $stores->toJSON();
 		});
 		
