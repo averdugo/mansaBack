@@ -34,11 +34,70 @@ class Cupon implements ControllerProviderInterface
 			return $cupon->toJSON();
 		});
 		
-		$controller->get('/', function(Application $app) {
+		$controller->get('/', function(Application $app, Request $req) {
 			
-			$cupons = Model\Cupon::with('store')->get();
+			$db = $app['capsule']->connection();
+			$query = Model\Cupon::query();
+			
+			
+			if ($req->get('lat') && $lon = $req->get('lon') && $req->get('maxdist'))
+			{
+				$geo = (object)[
+					'lat'		=> $req->get('lat'),
+					'lon'		=> $req->get('lon'),
+					'distance'	=> $req->get('maxdist')
+				];
+				
+				foreach ($geo as $key => $val)
+				{
+					if (!is_numeric($val))
+					{
+						throw new \Exception('invalid value: '.$key);
+					}
+				}
+			}
+			
+			$query->with(['store' => function($q) use ($req, $db, $geo) {
+				
+				$q->select('*');
+				
+				if ($geo)
+				{
+					$q->addSelect(
+						$db->raw('ST_Distance('.
+							'location::geometry'.
+							", ST_GeographyFromText('SRID=4326;POINT({$geo->lat} {$geo->lon})')) ".
+							"as distance"
+						)
+					);
+				}
+				
+			}]);
+			
+			$query->whereHas('store', function($q) use ($req, $geo) {
+				
+				if ($geo)
+				{
+					$lat		= $req->get('lat');
+					$lon		= $req->get('lon');
+					$distance	= $req->get('maxdist');
+					
+					$q->whereRaw(
+						"ST_DWithin(location, ST_GeographyFromText(?), ?)",
+						["SRID=4326;POINT({$geo->lat} {$geo->lon})", $distance]
+					);
+				}
+			});
+			
+			$cupons = $query->get();
 			return $cupons->toJSON();
 		});
+		
+		$controller->get('/{id}', function(Application $app, $id) {
+			$cupons = Model\Cupon::with('store')->find($id);
+			return $cupons->toJSON();
+		});
+		
 		
 		return $controller;
 	}
