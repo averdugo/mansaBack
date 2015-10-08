@@ -56,6 +56,11 @@ class Cupon implements ControllerProviderInterface
 					}
 				}
 			}
+			else
+			{
+				$geo = null;
+			}
+			
 			
 			$query->with(['store' => function($q) use ($req, $db, $geo) {
 				
