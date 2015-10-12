@@ -43,6 +43,7 @@ $app->mount('/user', new App\Controller\Login);
 $app->mount('/store', new App\Controller\Store);
 $app->mount('/cupon', new App\Controller\Cupon);
 $app->mount('/device', new App\Controller\Device);
+$app->mount('/redemption', new App\Controller\Redemption);
 
 $app['capsule'];
 
