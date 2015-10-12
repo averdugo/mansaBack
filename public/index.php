@@ -42,6 +42,7 @@ $app->register(new Silex\Provider\SessionServiceProvider());
 $app->mount('/user', new App\Controller\Login);
 $app->mount('/store', new App\Controller\Store);
 $app->mount('/cupon', new App\Controller\Cupon);
+$app->mount('/device', new App\Controller\Device);
 
 $app['capsule'];
 
