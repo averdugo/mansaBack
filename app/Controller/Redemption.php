@@ -50,6 +50,35 @@ class Redemption implements ControllerProviderInterface
 			return $redemption->toJSON();
 		});
 		
+		$controller->patch("/{id}", function(Request $req, $id) {
+			
+			$redemption = Model\Redemption::find($id);
+			if (!$redemption)
+			{
+				throw new NotFoundHttpException('no such redemption');
+			}
+			
+			$redemption->is_confirmed = $req->get('is_confirmed');
+			$redemption->save();
+			
+			return $redemption->toJSON();
+		});
+		
+		$controller->get("/", function(Request $req) {
+			
+			$query = (new Model\Redemption)->newQuery();
+			
+			
+			$query->where('device_id', '=', $req->get('device_id'));
+			if ($req->get('cupon_id'))
+			{
+				$query->where('cupon_id', '=', $req->get('cupon_id'));
+			}
+			
+			return $query->get()->toJSON();
+		});
+		
+		
 		return $controller;
 	}
 }
