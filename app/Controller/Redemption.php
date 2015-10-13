@@ -8,6 +8,8 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Request;
 
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+
 use App\Model;
 
 /******************************************************************************/
@@ -24,9 +26,24 @@ class Redemption implements ControllerProviderInterface
 		
 		$controller->put("/", function(Request $req) {
 			
+			$cupon = Model\Cupon::find($req->get('c'));
+			if (!$cupon)
+			{
+				throw new NotFoundHttpException("No existe el Cupon");
+			}
+			
+			$count = Model\Redemption
+				::where('cupon_id', '=', $cupon->id)
+				->count();
+			
+			if ($count >= $cupon->stock)
+			{
+				throw new \Exception("cupon se ha quedado sin stock");
+			}
+			
 			$redemption = new Model\Redemption;
-			$redemption->cupon()->associate(Model\Cupon::find($req->get('cupon_id')));
-			$redemption->device_id = $req->get('device_id');
+			$redemption->cupon()->associate($cupon);
+			$redemption->device_id = $req->get('d');
 			
 			$redemption->save();
 			
