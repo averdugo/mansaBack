@@ -41,6 +41,11 @@ class Login implements ControllerProviderInterface
 				->with('stores')
 				->first();
 			
+			if (!$login)
+			{
+				throw new \Exception("Unable to Login");
+			}
+			
 			$rc = password_verify($req->get('password'), $login->password);
 			if ($rc)
 			{
