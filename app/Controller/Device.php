@@ -28,7 +28,7 @@ class Device implements ControllerProviderInterface
 			try
 			{
 				// Generate a version 4 (random) UUID object
-				return json_encode(['uuid' => Uuid::uuid4()->toString()]);
+				return json_encode(['uuid' => uniqid()]);
 			}
 			catch (UnsatisfiedDependencyException $e)
 			{
