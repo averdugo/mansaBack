@@ -48,7 +48,7 @@ class Login implements ControllerProviderInterface
 				return $login->toJSON();
 			}
 			
-			throw new Exception('Unable to Login');
+			throw new \Exception('Unable to Login');
 		});
 		
 		$controller->get('/current', function(Application $app) {
