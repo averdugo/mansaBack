@@ -22,13 +22,14 @@ class Cupon implements ControllerProviderInterface
 	{
 		$controller = $app['controllers_factory'];
 		
+		
 		$controller->put('/', function(Application $app, Request $req) {
 			
 			$cupon = new Model\Cupon;
 			$cupon->store_id = $req->get('store_id');
-			$cupon->label = $req->get('label');
-			$cupon->drink = $req->get('drink');
+			$cupon->description = $req->get('description');
 			$cupon->price = $req->get('price');
+			$cupon->stock = $req->get('stock');
 			$cupon->save();
 			
 			return $cupon->toJSON();
