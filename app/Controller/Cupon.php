@@ -92,7 +92,7 @@ class Cupon implements ControllerProviderInterface
 							"as distance"
 						)
 					);
-				
+					
 				}]);
 				
 				$query->whereHas('store', function($q) use ($req, $geo) {
@@ -106,7 +106,7 @@ class Cupon implements ControllerProviderInterface
 			else if ($req->get('q'))
 			{
 				$query->whereRaw(
-					"to_tsvector('english', description) @@ to_tsquery(?)",
+					"to_tsvector('english', description) @@ plainto_tsquery(?)",
 					[$req->get('q')]
 				);
 			}
