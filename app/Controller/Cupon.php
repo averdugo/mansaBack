@@ -46,7 +46,24 @@ class Cupon implements ControllerProviderInterface
 				$geo = (object)[
 					'lat'		=> $req->get('lat'),
 					'lon'		=> $req->get('lon'),
-					'distance'	=> $req->get('maxdist')
+					'dst'	=> $req->get('maxdist')
+				];
+				
+				foreach ($geo as $key => $val)
+				{
+					if (!is_numeric($val))
+					{
+						throw new \Exception('invalid value: '.$key);
+					}
+				}
+			}
+			else if ($req->get('g'))
+			{
+				$parts = explode(',', $req->get('g'));
+				$geo = (object)[
+					'lat'	=> $parts[0],
+					'lon'	=> $parts[1],
+					'dst'	=> $parts[2],
 				];
 				
 				foreach ($geo as $key => $val)
@@ -63,12 +80,11 @@ class Cupon implements ControllerProviderInterface
 			}
 			
 			
-			$query->with(['store' => function($q) use ($req, $db, $geo) {
-				
-				$q->select('*');
-				
-				if ($geo)
-				{
+			if ($geo)
+			{
+				$query->with(['store' => function($q) use ($req, $db, $geo) {
+					
+					$q->select('*');
 					$q->addSelect(
 						$db->raw('ST_Distance('.
 							'location::geometry'.
@@ -76,24 +92,31 @@ class Cupon implements ControllerProviderInterface
 							"as distance"
 						)
 					);
-				}
 				
-			}]);
-			
-			$query->whereHas('store', function($q) use ($req, $geo) {
+				}]);
 				
-				if ($geo)
-				{
-					$lat		= $req->get('lat');
-					$lon		= $req->get('lon');
-					$distance	= $req->get('maxdist');
+				$query->whereHas('store', function($q) use ($req, $geo) {
 					
 					$q->whereRaw(
 						"ST_DWithin(location, ST_GeographyFromText(?), ?)",
-						["SRID=4326;POINT({$geo->lat} {$geo->lon})", $distance]
+						["SRID=4326;POINT({$geo->lat} {$geo->lon})", $geo->dst]
 					);
-				}
-			});
+				});
+			}
+			else if ($req->get('q'))
+			{
+				$query->whereRaw(
+					"to_tsvector('english', description) @@ to_tsquery(?)",
+					[$req->get('q')]
+				);
+			}
+			else
+			{
+				$query->whereHas('store', function($q) use ($app) {
+					$q->where('login_id', '=', $app['session']->get('user_id'));
+				});
+			}
+			
 			
 			$cupons = $query->get();
 			return $cupons->toJSON();
