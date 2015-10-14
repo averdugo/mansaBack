@@ -46,7 +46,7 @@ class Cupon implements ControllerProviderInterface
 				$geo = (object)[
 					'lat'		=> $req->get('lat'),
 					'lon'		=> $req->get('lon'),
-					'dst'	=> $req->get('maxdist')
+					'dst'		=> $req->get('maxdist')
 				];
 				
 				foreach ($geo as $key => $val)
