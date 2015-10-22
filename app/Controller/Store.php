@@ -46,9 +46,42 @@ class Store implements ControllerProviderInterface
 			$store->address = $req->get('address');
 			$store->comuna = $req->get('comuna');
 			$store->region = $req->get('region');
+			$store->name = $req->get('name');
 			$store->location = $db->raw("ST_GeographyFromText('SRID=4326;POINT({$lat} {$lon})')");
 			$store->save();
 			
+			return $store->toJSON();
+		});
+		
+		$controller->patch('/{id}', function(Application $app, Request $req, $id) {
+			
+			$db = $app['capsule']->connection();
+			
+			
+			$lat = $req->get('lat');
+			$lon = $req->get('lon');
+			
+			
+			$store = Model\Store::find($id);
+			
+			foreach (['address', 'name', 'comuna', 'region', 'location'] as $field)
+			{
+				
+				if (($value = $req->get($field)) !== null)
+				{
+					if ($field == 'location')
+					{
+						list($lat, $lon) = explode(',', $value);
+						$store->location = $db->raw("ST_GeographyFromText('SRID=4326;POINT({$lat} {$lon})')");
+					}
+					else
+					{
+						$store->{$field} = $value;
+					}
+				}
+			}
+			
+			$store->save();
 			return $store->toJSON();
 		});
 		
