@@ -63,7 +63,7 @@ class Cupon implements ControllerProviderInterface
 				$geo = (object)[
 					'lat'	=> $parts[0],
 					'lon'	=> $parts[1],
-					'dst'	=> $parts[2],
+					'dst'	=> @$parts[2],
 				];
 				
 				foreach ($geo as $key => $val)
@@ -80,11 +80,12 @@ class Cupon implements ControllerProviderInterface
 			}
 			
 			
-			if ($geo)
-			{
-				$query->with(['store' => function($q) use ($req, $db, $geo) {
-					
-					$q->select('*');
+			$query->with(['store' => function($q) use ($req, $db, $geo) {
+				
+				$q->select('*');
+				
+				if ($geo)
+				{
 					$q->addSelect(
 						$db->raw('ST_Distance('.
 							'location::geometry'.
@@ -92,9 +93,12 @@ class Cupon implements ControllerProviderInterface
 							"as distance"
 						)
 					);
-					
-				}]);
-				
+				}
+			}]);
+			
+			
+			if ($geo && $geo->dst)
+			{
 				$query->whereHas('store', function($q) use ($req, $geo) {
 					
 					$q->whereRaw(
@@ -103,18 +107,13 @@ class Cupon implements ControllerProviderInterface
 					);
 				});
 			}
-			else if ($req->get('q'))
+			
+			if ($req->get('q'))
 			{
 				$query->whereRaw(
 					"to_tsvector('english', description) @@ plainto_tsquery(?)",
 					[$req->get('q')]
 				);
-			}
-			else
-			{
-				$query->whereHas('store', function($q) use ($app) {
-					$q->where('login_id', '=', $app['session']->get('user_id'));
-				});
 			}
 			
 			if ($req->get('p'))
@@ -124,6 +123,15 @@ class Cupon implements ControllerProviderInterface
 					explode('-', $req->get('p'))
 				);
 			}
+			
+			
+			if (!$req->get('q') && !$req->get('p') && !$req->get('c'))
+			{
+				$query->whereHas('store', function($q) use ($app) {
+					$q->where('login_id', '=', $app['session']->get('user_id'));
+				});
+			}
+			
 			
 			$cupons = $query->get();
 			return $cupons->toJSON();
