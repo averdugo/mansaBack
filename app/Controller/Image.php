@@ -35,7 +35,7 @@ class Image implements ControllerProviderInterface
 			return json_encode($image->toJSON());
 		});
 		
-		$controller->get('/{id}', function($id) use ($imgmgr) {
+		$controller->get('/{id}', function(Request $req, $id) use ($imgmgr) {
 			
 			$image = Model\Image::find($id);
 			if (!$image)
@@ -44,35 +44,25 @@ class Image implements ControllerProviderInterface
 			}
 			
 			$img = $imgmgr->make(base64_decode($image->data));
+			
+			if ($req->get('sx') || $req->get('sy'))
+			{
+				$img->resize(
+					$req->get('sx', null),
+					$req->get('sy', null),
+					function($constraint) use ($req) {
+						
+						if (!$req->get('sx') || !$req->get('sy'))
+						{
+							$constraint->aspectRatio();
+						}
+					}
+				);
+			}
 			
 			return new Response(
 				$img->encode('jpg'), 200, 
 				['Content-Type' => 'image/jpeg']
-			);
-		});
-		
-		$controller->get('/{sx}/{sy}/{id}', function($sx, $sy, $id) use ($imgmgr) {
-			
-			$image = Model\Image::find($id);
-			if (!$image)
-			{
-				return new NotFoundHttpException('No such image');
-			}
-			
-			if ($sx == 0) $sx = null;
-			if ($sy == 0) $sy = null;
-			
-			$img = $imgmgr->make(base64_decode($image->data));
-			$img->resize($sx, $sy, function($constraint) {
-				$constraint->aspectRatio();
-			})
-			//->blur(2)
-			//->sharpen(10)
-			;
-			
-			return new Response(
-				$img->encode('jpg'), 200, 
-				['Content-Type' => 'image/png']
 			);
 		});
 		
