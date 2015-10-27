@@ -43,6 +43,7 @@ $app->mount('/user', new App\Controller\Login);
 $app->mount('/store', new App\Controller\Store);
 $app->mount('/cupon', new App\Controller\Cupon);
 $app->mount('/device', new App\Controller\Device);
+$app->mount('/image', new App\Controller\Image);
 $app->mount('/redemption', new App\Controller\Redemption);
 
 $app['capsule'];
@@ -63,7 +64,12 @@ $app->before(function (Request $request) {
 
 //handling CORS respons with right headers
 $app->after(function (Request $req, Response $res) {
-	$res->headers->set("Content-Type","application/json");
+	
+	if (!$res->headers->has('content-type'))
+	{
+		$res->headers->set("Content-Type","application/json");
+	}
+	
 	if ($req->getMethod() != "OPTIONS")
 	{
 		$res->headers->set("Access-Control-Allow-Origin","*");

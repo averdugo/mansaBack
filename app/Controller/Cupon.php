@@ -26,6 +26,19 @@ class Cupon implements ControllerProviderInterface
 		$controller->put('/', function(Application $app, Request $req) {
 			
 			$cupon = new Model\Cupon;
+			
+			
+			if ($req->get('image_id'))
+			{
+				$image = Model\Image::find($req->get('image_id'));
+				if (!$image)
+				{
+					return new NotFoundHttpException('No such image');
+				}
+				
+				$cupon->image()->associate($image);
+			}
+			
 			$cupon->store_id = $req->get('store_id');
 			$cupon->description = $req->get('description');
 			$cupon->price = $req->get('price');

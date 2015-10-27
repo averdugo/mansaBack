@@ -41,6 +41,17 @@ class Store implements ControllerProviderInterface
 			$lon = $req->get('lon');
 			
 			
+			if ($req->get('image_id'))
+			{
+				$image = Model\Image::find($req->get('image_id'));
+				if (!$image)
+				{
+					return new NotFoundHttpException('No such image');
+				}
+				
+				$store->image()->associate($image);
+			}
+			
 			$store = new Model\Store;
 			$store->login_id = $app['session']->get('user_id');
 			$store->address = $req->get('address');
@@ -80,6 +91,19 @@ class Store implements ControllerProviderInterface
 					}
 				}
 			}
+			
+			
+			if ($req->get('image_id'))
+			{
+				$image = Model\Image::find($req->get('image_id'));
+				if (!$image)
+				{
+					return new NotFoundHttpException('No such image');
+				}
+				
+				$store->image()->associate($image);
+			}
+			
 			
 			$store->save();
 			return $store->toJSON();
