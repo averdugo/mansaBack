@@ -117,6 +117,13 @@ class Cupon implements ControllerProviderInterface
 				});
 			}
 			
+			if ($req->get('p'))
+			{
+				$query->whereBetween(
+					'price',
+					explode('-', $req->get('p'))
+				);
+			}
 			
 			$cupons = $query->get();
 			return $cupons->toJSON();
