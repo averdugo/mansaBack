@@ -134,7 +134,7 @@ class Cupon implements ControllerProviderInterface
 				});
 			}
 			
-			if (!$req->get('q') && !$req->get('p') && !$req->get('c'))
+			if (!$geo && !$req->get('q') && !$req->get('p') && !$req->get('c'))
 			{
 				$query->whereHas('store', function($q) use ($app) {
 					$q->where('login_id', '=', $app['session']->get('user_id'));
