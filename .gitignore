@@ -3,3 +3,5 @@ DEADJOE
 
 /vendor/
 /composer.lock
+
+/phinx.yml

@@ -14,12 +14,12 @@ environments:
         charset: utf8
 
     development:
-        adapter: mysql
-        host: localhost
+        adapter: pgsql
+        host: hydra
         name: mansapromo_dev
-        user: root
+        user: postgres
         pass: ''
-        port: 3306
+        port: 5432
         charset: utf8
 
     testing:
