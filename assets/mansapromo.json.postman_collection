@@ -13,7 +13,8 @@
 		"e76d3fa6-fcff-8114-3432-3cfffdee410b",
 		"e45c58d5-a859-c4ae-4514-5cb4205955bf",
 		"96432346-756b-bfae-1111-300a64fee65b",
-		"c3082a0e-1bac-f77a-ba08-638554544f79"
+		"c3082a0e-1bac-f77a-ba08-638554544f79",
+		"d3341f07-791d-00ff-48e4-aa3e2eb1a4e4"
 	],
 	"folders": [],
 	"timestamp": 1443238301819,
@@ -111,12 +112,12 @@
 			"tests": "",
 			"currentHelper": "normal",
 			"helperAttributes": {},
-			"time": 1444756375395,
+			"time": 1446327294253,
 			"name": "Create Store",
 			"description": "",
 			"collectionId": "ec3c18e9-ab1c-34e2-b42f-54be8f366484",
 			"responses": [],
-			"rawModeData": "{\n    \"address\": \"Apoquindo\",\n    \"comuna\": \"Las Condas\",\n    \"region\": \"RM\",\n    \"lat\": -33.395954,\n    \"lon\": -70.499499\n}\n"
+			"rawModeData": "{\n    \"address\": \"Apoquindo\",\n    \"name\": \"Pegandole al Asfalto\",\n    \"phone\": \"56968180792\",\n    \"comuna\": \"Las Condas\",\n    \"region\": \"RM\",\n    \"lat\": -33.395954,\n    \"lon\": -70.499499,\n    \"hours\": [\n        {\"from\": 1, \"to\": 5, \"open\": \"10:00\", \"close\": \"01:00\" },\n        {\"from\": 6, \"to\": 0, \"open\": \"11:00\", \"close\": \"00:00\" }\n    ]\n}\n"
 		},
 		{
 			"id": "70e681a4-ab87-c1ac-6f18-81985de0b9e7",
@@ -192,6 +193,26 @@
 			"description": "",
 			"descriptionFormat": "html",
 			"time": 1444826593103,
+			"version": 2,
+			"responses": [],
+			"tests": "",
+			"currentHelper": "normal",
+			"helperAttributes": {}
+		},
+		{
+			"id": "d3341f07-791d-00ff-48e4-aa3e2eb1a4e4",
+			"headers": "Accept: application/json\nContent-Type: application/json\n",
+			"url": "http://{{host}}/cupon?g=-33.4275093,-70.6199263,5000",
+			"pathVariables": {},
+			"preRequestScript": "",
+			"method": "GET",
+			"collectionId": "ec3c18e9-ab1c-34e2-b42f-54be8f366484",
+			"data": [],
+			"dataMode": "params",
+			"name": "Search  Cupons Geographically",
+			"description": "",
+			"descriptionFormat": "html",
+			"time": 1444826787988,
 			"version": 2,
 			"responses": [],
 			"tests": "",
