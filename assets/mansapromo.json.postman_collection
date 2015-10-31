@@ -112,7 +112,7 @@
 			"tests": "",
 			"currentHelper": "normal",
 			"helperAttributes": {},
-			"time": 1446327294253,
+			"time": 1446327558974,
 			"name": "Create Store",
 			"description": "",
 			"collectionId": "ec3c18e9-ab1c-34e2-b42f-54be8f366484",
@@ -172,12 +172,12 @@
 			"tests": "",
 			"currentHelper": "normal",
 			"helperAttributes": {},
-			"time": 1444792603331,
+			"time": 1446328583082,
 			"name": "Create Cupon",
 			"description": "",
 			"collectionId": "ec3c18e9-ab1c-34e2-b42f-54be8f366484",
 			"responses": [],
-			"rawModeData": "{\n    \"store_id\": 3,\n    \"drink\": \"whiskey\",\n    \"label\": \"jack daniels\",\n    \"price\": 15500\n}\n"
+			"rawModeData": "{\n    \"store_id\": 10,\n    \"stock\": 100,\n    \"drink\": \"whiskey\",\n    \"label\": \"jack daniels\",\n    \"price\": 17500\n}\n"
 		},
 		{
 			"id": "c3082a0e-1bac-f77a-ba08-638554544f79",
