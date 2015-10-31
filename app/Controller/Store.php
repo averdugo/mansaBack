@@ -63,7 +63,7 @@ class Store implements ControllerProviderInterface
 			$store->location = $db->raw("ST_GeographyFromText('SRID=4326;POINT({$lat} {$lon})')");
 			$store->save();
 			
-			return $store->toJSON();
+			return new JsonResponse($store->toArray());
 		});
 		
 		$controller->patch('/{id}', function(Application $app, Request $req, $id) {
@@ -108,7 +108,7 @@ class Store implements ControllerProviderInterface
 			
 			
 			$store->save();
-			return $store->toJSON();
+			return new JsonResponse($store->toArray());
 		});
 		
 		$controller->get('/', function(Application $app, Request $req) {
@@ -152,7 +152,7 @@ class Store implements ControllerProviderInterface
 			
 			
 			$stores = $query->get();
-			return $stores->toJSON();
+			return new JsonResponse($stores->toArray());
 		});
 		
 		return $controller;

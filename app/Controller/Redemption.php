@@ -47,7 +47,7 @@ class Redemption implements ControllerProviderInterface
 			
 			$redemption->save();
 			
-			return $redemption->toJSON();
+			return new JsonResponse($redemption->toArray());
 		});
 		
 		$controller->patch("/{id}", function(Request $req, $id) {
@@ -61,7 +61,7 @@ class Redemption implements ControllerProviderInterface
 			$redemption->is_confirmed = $req->get('is_confirmed');
 			$redemption->save();
 			
-			return $redemption->toJSON();
+			return new JsonResponse($redemption->toArray());
 		});
 		
 		$controller->get("/", function(Request $req) {
@@ -75,7 +75,7 @@ class Redemption implements ControllerProviderInterface
 				$query->where('cupon_id', '=', $req->get('cupon_id'));
 			}
 			
-			return $query->get()->toJSON();
+			return new JsonResponse($query->get()->toArray());
 		});
 		
 		

@@ -32,7 +32,7 @@ class Image implements ControllerProviderInterface
 			$image->data = base64_encode($req->getContent());
 			$image->save();
 			
-			return json_encode($image->toJSON());
+			return new JsonResponse($image->toArray());
 		});
 		
 		$controller->get('/{id}', function(Request $req, $id) use ($imgmgr) {

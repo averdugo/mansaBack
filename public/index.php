@@ -65,11 +65,6 @@ $app->before(function (Request $request) {
 //handling CORS respons with right headers
 $app->after(function (Request $req, Response $res) {
 	
-	if (!$res->headers->has('content-type'))
-	{
-		$res->headers->set("Content-Type","application/json");
-	}
-	
 	if ($req->getMethod() != "OPTIONS")
 	{
 		$res->headers->set("Access-Control-Allow-Origin","*");

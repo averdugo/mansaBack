@@ -45,7 +45,7 @@ class Cupon implements ControllerProviderInterface
 			$cupon->stock = $req->get('stock');
 			$cupon->save();
 			
-			return $cupon->toJSON();
+			return new JsonResponse($cupon->toArray());
 		});
 		
 		$controller->get('/', function(Application $app, Request $req) {
@@ -156,12 +156,12 @@ class Cupon implements ControllerProviderInterface
 			
 			
 			$cupons = $query->get();
-			return $cupons->toJSON();
+			return new JsonResponse($cupons->toArray());
 		});
 		
 		$controller->get('/{id}', function(Application $app, $id) {
 			$cupons = Model\Cupon::with('store')->find($id);
-			return $cupons->toJSON();
+			return new JsonResponse($cupons->toArray());
 		});
 		
 		

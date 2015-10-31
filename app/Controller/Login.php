@@ -32,7 +32,7 @@ class Login implements ControllerProviderInterface
 			$login->password	= password_hash($req->get('password'), PASSWORD_BCRYPT);
 			
 			$login->save();
-			return $login->toJSON();
+			return new JsonResponse($login->toArray());
 		});
 		
 		$controller->post('/login', function(Application $app, Request $req) {
@@ -57,13 +57,13 @@ class Login implements ControllerProviderInterface
 		});
 		
 		$controller->get('/current', function(Application $app) {
-			return json_encode(['user_id' => $app['session']->get('user_id')]);
+			return new JsonResponse(['user_id' => $app['session']->get('user_id')]);
 		});
 		
 		$controller->post('/logout', function(Application $app, Request $req) {
 			
 			$app['session']->remove('user_id');
-			return json_encode(['is_logged_out' => true]);
+			return new JsonResponse(['is_logged_out' => true]);
 		});
 		
 		return $controller;
