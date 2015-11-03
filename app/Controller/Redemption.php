@@ -66,6 +66,19 @@ class Redemption implements ControllerProviderInterface
 		
 		$controller->get("/", function(Request $req) {
 			
+			$perpage = 50;
+			if ($req->get('perpage'))
+			{
+				$perpage = $req->get('perpage');
+				if ($perpage > 100)
+				{
+					$perpage = 100; 
+				}
+			}
+			
+			
+			$resp = new JsonResponse;
+			
 			$query = (new Model\Redemption)->newQuery();
 			if ($req->get('device_id'))
 			{
@@ -75,8 +88,57 @@ class Redemption implements ControllerProviderInterface
 			{
 				$query->where('cupon_id', '=', $req->get('cupon_id'));
 			}
+			$count = $query->count();
 			
-			return new JsonResponse($query->get()->toArray());
+			
+			if ($req->get('p'))
+			{
+				$page = $req->get('p');
+			}
+			else
+			{
+				$page = 0;
+			}
+			$query->take($perpage);
+			$query->skip($perpage * $page);
+			
+			
+			$links = [];
+			if ($page > 0)
+			{
+				$prev = clone $req;
+				$prev->query->remove('p');
+				$prev->query->set('p', $page-1);
+				
+				$links[] = '<'.$prev->getSchemeAndHttpHost().
+						$prev->getBaseUrl() . 
+						$prev->getPathInfo() . '?' .
+						http_build_query($prev->query->all()).">; ".
+					"rel=\"prev\"";
+			}
+			if ($page < (round($count/$perpage)))
+			{
+				$next = clone $req;
+				$next->query->set('p', $page+1);
+				
+				$links[] = '<'.$next->getSchemeAndHttpHost().
+						$next->getBaseUrl() . 
+						$next->getPathInfo() . '?' .
+						http_build_query($next->query->all()).">; ".
+					"rel=\"next\"";
+			}
+			
+			
+			if (count($links) > 0)
+			{
+				$resp->headers->set('Link', implode(', ', $links));
+			}
+			
+			$resp->headers->set('X-Total-Count', $count);
+			$resp->headers->set('X-Total-Pages', $count/$perpage);
+			$resp->setData($query->get()->toArray());
+			
+			return $resp;
 		});
 		
 		$controller->get("/{id}", function(Request $req, $id) {
