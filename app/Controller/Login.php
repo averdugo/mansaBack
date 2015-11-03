@@ -50,7 +50,7 @@ class Login implements ControllerProviderInterface
 			if ($rc)
 			{
 				$app['session']->set('user_id', $login->id);
-				return $login->toJSON();
+				return new JsonResponse($login->toArray());
 			}
 			
 			throw new \Exception('Unable to Login');
