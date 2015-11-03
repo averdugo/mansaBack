@@ -67,15 +67,21 @@ class Redemption implements ControllerProviderInterface
 		$controller->get("/", function(Request $req) {
 			
 			$query = (new Model\Redemption)->newQuery();
-			
-			
-			$query->where('device_id', '=', $req->get('device_id'));
+			if ($req->get('device_id'))
+			{
+				$query->where('device_id', '=', $req->get('device_id'));
+			}
 			if ($req->get('cupon_id'))
 			{
 				$query->where('cupon_id', '=', $req->get('cupon_id'));
 			}
 			
 			return new JsonResponse($query->get()->toArray());
+		});
+		
+		$controller->get("/{id}", function(Request $req, $id) {
+			$redemption = Model\Redemption::find($id);
+			return new JsonResponse($redemption->toArray());
 		});
 		
 		
