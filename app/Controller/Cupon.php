@@ -146,6 +146,11 @@ class Cupon implements ControllerProviderInterface
 					);
 				});
 			}
+			if ($req->get('s'))
+			{
+				$query->where('store_id','=',$req->get('s'))
+				
+			}
 			
 			if ($req->get('s'))
 			{
