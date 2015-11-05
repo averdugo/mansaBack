@@ -11,6 +11,8 @@ class Store extends AbstractBase
 	 */
 	protected $hidden = ['login_id', 'location', 'created_at', 'updated_at', 'deleted_at'];
 	
+	protected $with = ['storetype'];
+	
 	public function getHoursAttribute($value)
 	{
 		return json_decode($value);
@@ -26,4 +28,8 @@ class Store extends AbstractBase
 		return $this->belongsTo('App\Model\Image');
 	}
 	
+	public function storetype()
+	{
+		return $this->belongsTo('App\Model\Storetype');
+	}	
 }
