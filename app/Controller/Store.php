@@ -27,6 +27,9 @@ class Store implements ControllerProviderInterface
 			$db = $app['capsule']->connection();
 			
 			
+			$store = new Model\Store;
+			
+			
 			if (!$req->get('lat') || !$req->get('lon'))
 			{
 				throw new \Exception("la tienda no tiene locacion");
@@ -52,7 +55,6 @@ class Store implements ControllerProviderInterface
 				$store->image()->associate($image);
 			}
 			
-			$store = new Model\Store;
 			$store->login_id	= $app['session']->get('user_id');
 			$store->address		= $req->get('address');
 			$store->comuna		= $req->get('comuna');

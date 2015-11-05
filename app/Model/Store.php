@@ -20,4 +20,10 @@ class Store extends AbstractBase
 	{
 		$this->attributes['hours'] = json_encode($value);
 	}
+	
+	public function image()
+	{
+		return $this->belongsTo('App\Model\Image');
+	}
+	
 }
