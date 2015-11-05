@@ -55,6 +55,17 @@ class Store implements ControllerProviderInterface
 				$store->image()->associate($image);
 			}
 			
+			if ($req->get('storetype_id'))
+			{
+				$storetype = Model\Storetype::find($req->get('storetype_id'));
+				if (!$storetype)
+				{
+					throw new NotFoundHttpException('No such store type');
+				}
+				
+				$store->storetype()->associate($storetype);
+			}
+			
 			$store->login_id	= $app['session']->get('user_id');
 			$store->address		= $req->get('address');
 			$store->comuna		= $req->get('comuna');
@@ -102,14 +113,35 @@ class Store implements ControllerProviderInterface
 				$image = Model\Image::find($req->get('image_id'));
 				if (!$image)
 				{
-					return new NotFoundHttpException('No such image');
+					throw new NotFoundHttpException('No such image');
 				}
 				
 				$store->image()->associate($image);
 			}
 			
 			
+			if ($req->get('storetype_id'))
+			{
+				$storetype = Model\StoreType::find($req->get('storetype_id'));
+				if (!$storetype)
+				{
+					throw new NotFoundHttpException('No such store type');
+				}
+				
+				$store->storetype()->associate($storetype);
+			}
+			
+			
 			$store->save();
+			return new JsonResponse($store->toArray());
+		});
+		
+		$controller->get('/{id}', function(Application $app, Request $req, $id) {
+			$store = Model\Store::find($id);
+			if (!$store)
+			{
+				throw new NotFoundHttpException('No such image');
+			}
 			return new JsonResponse($store->toArray());
 		});
 		
