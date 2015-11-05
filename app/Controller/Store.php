@@ -53,14 +53,14 @@ class Store implements ControllerProviderInterface
 			}
 			
 			$store = new Model\Store;
-			$store->login_id = $app['session']->get('user_id');
-			$store->address = $req->get('address');
-			$store->comuna = $req->get('comuna');
-			$store->region = $req->get('region');
-			$store->name = $req->get('name');
-			$store->hours = json_encode($req->get('hours'));
-			$store->phone = $req->get('telephone');
-			$store->location = $db->raw("ST_GeographyFromText('SRID=4326;POINT({$lat} {$lon})')");
+			$store->login_id	= $app['session']->get('user_id');
+			$store->address		= $req->get('address');
+			$store->comuna		= $req->get('comuna');
+			$store->region		= $req->get('region');
+			$store->name		= $req->get('name');
+			$store->hours		= json_encode($req->get('hours'));
+			$store->phone		= $req->get('telephone');
+			$store->location	= $db->raw("ST_GeographyFromText('SRID=4326;POINT({$lat} {$lon})')");
 			$store->save();
 			
 			return new JsonResponse($store->toArray());
