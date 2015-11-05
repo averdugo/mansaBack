@@ -49,7 +49,7 @@ class Store implements ControllerProviderInterface
 				$image = Model\Image::find($req->get('image_id'));
 				if (!$image)
 				{
-					return new NotFoundHttpException('No such image');
+					throw new NotFoundHttpException('No such image');
 				}
 				
 				$store->image()->associate($image);
