@@ -165,8 +165,8 @@ class Store implements ControllerProviderInterface
 					}
 				}
 				
-				$query = Model\Store::select('*')
-					->addSelect(
+				$query = Model\Store::
+					addSelect(
 						$db->raw('ST_Distance('.
 							'location::geometry'.
 							", ST_GeographyFromText('SRID=4326;POINT({$geo->lat} {$geo->lon})')) ".

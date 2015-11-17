@@ -95,8 +95,6 @@ class Cupon implements ControllerProviderInterface
 			
 			$query->with(['store' => function($q) use ($req, $db, $geo) {
 				
-				$q->select('*');
-				
 				if ($geo)
 				{
 					$q->addSelect(
