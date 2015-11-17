@@ -22,6 +22,64 @@ class Store implements ControllerProviderInterface
 	{
 		$controller = $app['controllers_factory'];
 		
+		
+		$app['authority.redemption'] = function($app) {
+			
+			$app['authority']->allow('read', 'App\Model\Redemption',
+				// TODO: restrict access to redemptions to the
+				// redeeming user and/or store owners...
+				function($self, Model\Redemption $redemption) {
+					return true;
+				}
+			);
+			
+			$app['authority']->allow('create', 'App\Model\Redemption', 
+				function($self, Model\Redemption $redemption) {
+					return $self->user()->stores()
+						->where('id', '=', $redemption->cupon->store_id)
+						->count() >= 1;
+				}
+			);
+			
+			$app['authority']->allow('update', 'App\Model\Redemption',
+				function($self, Model\Redemption $redemption) {
+					
+					$changed = array_keys($redemption->getDirty());
+					
+					if (count($changed) == 1 && $changed[0] == 'is_redeemed')
+					{
+						return true;
+					}
+					
+					return false;
+				}
+			);
+			
+			return $app['authority'];
+		};
+		
+		$app['authority.cupon'] = function($app) {
+			
+			$app['authority']->addAlias('manage', ['create', 'update', 'delete', 'read']);
+			
+			$app['authority']->allow('read', 'App\Model\Cupon');
+			$app['authority']->allow('manage', 'App\Model\Cupon', function($self, Model\Cupon $cupon) {
+				
+				$canStore = $self->user()->stores()
+					->where('id', '=', $cupon->store_id)
+					->count() >= 1;
+				
+				$canImage = $cupon->image_id ?
+					$self->user()->id == $cupon->image->login_id :
+					true;
+				
+				return $canStore && $canImage;
+			});
+			
+			return $app['authority'];
+		};
+		
+		
 		$controller->put('/', function(Application $app, Request $req) {
 			
 			$db = $app['capsule']->connection();

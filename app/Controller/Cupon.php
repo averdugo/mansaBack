@@ -8,6 +8,8 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Request;
 
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
+
 use App\Model;
 
 /******************************************************************************/
@@ -22,6 +24,27 @@ class Cupon implements ControllerProviderInterface
 	{
 		$controller = $app['controllers_factory'];
 		
+		
+		$app['authority.cupon'] = function($app) {
+			
+			$app['authority']->addAlias('manage', ['create', 'update', 'delete', 'read']);
+			
+			$app['authority']->allow('read', 'App\Model\Cupon');
+			$app['authority']->allow('manage', 'App\Model\Cupon', function($self, Model\Cupon $cupon) {
+				
+				$canStore = $self->user()->stores()
+					->where('id', '=', $cupon->store_id)
+					->count() >= 1;
+				
+				$canImage = $cupon->image_id ?
+					$self->user()->id == $cupon->image->login_id :
+					true;
+				
+				return $canStore && $canImage;
+			});
+			
+			return $app['authority'];
+		};
 		
 		$controller->put('/', function(Application $app, Request $req) {
 			
@@ -43,6 +66,13 @@ class Cupon implements ControllerProviderInterface
 			$cupon->description = $req->get('description');
 			$cupon->price = $req->get('price');
 			$cupon->stock = $req->get('stock');
+			
+			
+			if (!$app['authority.cupon']->can('create', $cupon))
+			{
+				throw new AccessDeniedHttpException('Cannot create cupon (for this store)');
+			}
+			
 			$cupon->save();
 			
 			return new JsonResponse($cupon->toArray());
@@ -160,12 +190,23 @@ class Cupon implements ControllerProviderInterface
 			}
 			
 			
-			$cupons = $query->get();
+			$cupons = array_filter(
+				function($cupon) use ($app) {
+					return $app['authority.cupon']->can('read', $cupon);
+				},
+				$query->get()
+			);
+			
 			return new JsonResponse($cupons->toArray());
 		});
 		
 		$controller->get('/{id}', function(Application $app, $id) {
 			$cupons = Model\Cupon::with('store')->find($id);
+			if (!$app['authority.cupon']->can('read', $cupon))
+			{
+				throw new AccessDeniedHttpException('Cannot read cupon');
+			}
+			
 			return new JsonResponse($cupons->toArray());
 		});
 		

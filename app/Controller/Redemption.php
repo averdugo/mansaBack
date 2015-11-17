@@ -9,6 +9,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Request;
 
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 
 use App\Model;
 
@@ -23,6 +24,42 @@ class Redemption implements ControllerProviderInterface
 	public function connect(Application $app)
 	{
 		$controller = $app['controllers_factory'];
+		
+		
+		$app['authority.redemption'] = function($app) {
+			
+			$app['authority']->allow('read', 'App\Model\Redemption',
+				// TODO: restrict access to redemptions to the
+				// redeeming user and/or store owners...
+				function($self, Model\Redemption $redemption) {
+					return true;
+				}
+			);
+			
+			$app['authority']->allow('create', 'App\Model\Redemption', 
+				function($self, Model\Redemption $redemption) {
+					return $self->user()->stores()
+						->where('id', '=', $redemption->cupon->store_id)
+						->count() >= 1;
+				}
+			);
+			
+			$app['authority']->allow('update', 'App\Model\Redemption',
+				function($self, Model\Redemption $redemption) {
+					
+					$changed = array_keys($redemption->getDirty());
+					
+					if (count($changed) == 1 && $changed[0] == 'is_redeemed')
+					{
+						return true;
+					}
+					
+					return false;
+				}
+			);
+			
+			return $app['authority'];
+		};
 		
 		$controller->put("/", function(Request $req) {
 			
@@ -45,6 +82,11 @@ class Redemption implements ControllerProviderInterface
 			$redemption->cupon()->associate($cupon);
 			$redemption->device_id = $req->get('d');
 			
+			if (!$app['authority.redemption']->can('create', $redemption))
+			{
+				throw new AccessDeniedHttpException('Unable to create redemption');
+			}
+			
 			$redemption->save();
 			
 			return new JsonResponse($redemption->toArray());
@@ -59,6 +101,13 @@ class Redemption implements ControllerProviderInterface
 			}
 			
 			$redemption->is_confirmed = $req->get('is_confirmed');
+			
+			
+			if (!$app['authority.redemption']->can('update', $redemption))
+			{
+				throw new AccessDeniedHttpException('Unable to update redemption');
+			}
+			
 			$redemption->save();
 			
 			return new JsonResponse($redemption->toArray());
@@ -134,15 +183,31 @@ class Redemption implements ControllerProviderInterface
 				$resp->headers->set('Link', implode(', ', $links));
 			}
 			
+			
+			$redemptions = array_filter(
+				function($redemption) use ($app) {
+					return $app['authority.redemption']
+						->can('read', $redemption);
+				},
+				$query->get()
+			);
+			
+			
 			$resp->headers->set('X-Total-Count', $count);
 			$resp->headers->set('X-Total-Pages', $count/$perpage);
-			$resp->setData($query->get()->toArray());
+			$resp->setData($redemptions->toArray());
 			
 			return $resp;
 		});
 		
 		$controller->get("/{id}", function(Request $req, $id) {
+			
 			$redemption = Model\Redemption::find($id);
+			if (!$app['authority.redemption']->can('read', $redemption))
+			{
+				throw new AccessDeniedHttpException('Unable to update redemption');
+			}
+			
 			return new JsonResponse($redemption->toArray());
 		});
 		

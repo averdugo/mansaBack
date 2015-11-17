@@ -7,6 +7,9 @@ use Symfony\Component\Yaml\Yaml;
 
 use Silex\Application;
 
+use Authority\Authority;
+
+
 require_once __DIR__ . '/../vendor/autoload.php';
 
 
@@ -50,7 +53,17 @@ $app['capsule'];
 
 
 //handling CORS preflight request
-$app->before(function (Request $request) {
+$app->before(function (Request $request, Application $app) {
+	
+	$app['user'] = $app->share(function($c) use ($app) {
+		trigger_error("Retrieving user login for: ".$app['session']->get('user_id'));
+		return App\Model\Login::find($app['session']->get('user_id'));
+	});
+	
+	$app['authority'] = $app->share(function($c) use ($app) {
+		return new Authority($app['user']);
+	});
+	
 	if ($request->getMethod() === "OPTIONS") {
 		$response = new Response();
 		$response->headers->set("Access-Control-Allow-Origin","*");
