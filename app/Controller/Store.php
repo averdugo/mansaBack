@@ -62,7 +62,7 @@ class Store implements ControllerProviderInterface
 		
 		$app['authority.cupon'] = function($app) {
 			
-			$app['authority']->addAlias('manage', ['create', 'update', 'delete', 'read']);
+			$app['authority']->addAlias('manage', ['create', 'update', 'delete']);
 			
 			$app['authority']->allow('read', 'App\Model\Cupon');
 			$app['authority']->allow('manage', 'App\Model\Cupon', function($self, Model\Cupon $cupon) {
