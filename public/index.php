@@ -56,7 +56,7 @@ $app['capsule'];
 $app->before(function (Request $request, Application $app) {
 	
 	$app['user'] = $app->share(function($c) use ($app) {
-		trigger_error("Retrieving user login for: ".$app['session']->get('user_id'));
+		//trigger_error("Retrieving user login for: ".$app['session']->get('user_id'));
 		return App\Model\Login::find($app['session']->get('user_id'));
 	});
 	
