@@ -8,6 +8,8 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Request;
 
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+
 use App\Model;
 
 /******************************************************************************/
@@ -163,7 +165,20 @@ class Cupon implements ControllerProviderInterface
 		});
 		
 		$controller->get('/{id}', function(Application $app, $id) {
+			
 			$cupons = Model\Cupon::with('store')->find($id);
+			if (!$cupon)
+			{
+				throw new NotFoundHttpException("No existe el Cupon");
+			}
+			
+			$redemptions = Model\Redemption
+				::where('cupon_id', '=', $cupon->id)
+				->count();
+			
+			$cupon->left = $cupon->stock - $redemptions;
+			
+			
 			return new JsonResponse($cupons->toArray());
 		});
 		
