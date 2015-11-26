@@ -25,11 +25,30 @@ class Image implements ControllerProviderInterface
 		$imgmgr = new \Intervention\Image\ImageManager;
 		$controller->put('/', function(Application $app, Request $req) use ($imgmgr) {
 			
+			
+			if (
+				$req->headers->has('x-content-transfer-encoding') && 
+				!$req->headers->has('x-content-transfer-encoding')
+			)
+			{
+				$req->headers->set(
+					'Content-Transfer-Encoding', 
+					$req->headers->get('x-content-transfer-encoding')
+				);
+			}
+			
+			if (strtolower($req->headers->get('content-transfer-encoding')) == 'base64')
+			{
+				$req->setContent(base64_decode($req->getContent()));
+			}
+			
+			
 			$image = new Model\Image;
 			$img = $imgmgr->make($req->getContent());
 			$image->mimetype = $img->mime();
 			$image->login_id = $app['session']->get('user_id');
-			$image->data = base64_encode($req->getContent());
+			$image->data = $req->getContent();
+			
 			$image->save();
 			
 			return new JsonResponse($image->toArray());

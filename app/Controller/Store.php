@@ -8,6 +8,8 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Request;
 
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+
 use App\Model;
 
 /******************************************************************************/
@@ -195,11 +197,22 @@ class Store implements ControllerProviderInterface
 		});
 		
 		$controller->get('/{id}', function(Application $app, Request $req, $id) {
+			
 			$store = Model\Store::find($id);
 			if (!$store)
 			{
 				throw new NotFoundHttpException('No such image');
 			}
+			
+			
+			$store->cupons = ['redeemed' => 
+				Model\Redemption::whereHas('cupon', function($q) use ($store) {
+					$q->where('store_id', '=', $store->id);
+				})
+				->count()
+			];
+			
+			
 			return new JsonResponse($store->toArray());
 		});
 		

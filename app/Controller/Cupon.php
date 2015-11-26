@@ -9,6 +9,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Request;
 
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 use App\Model;
 
@@ -27,7 +28,7 @@ class Cupon implements ControllerProviderInterface
 		
 		$app['authority.cupon'] = function($app) {
 			
-			$app['authority']->addAlias('manage', ['create', 'update', 'delete', 'read']);
+			$app['authority']->addAlias('manage', ['create', 'update', 'delete']);
 			
 			$app['authority']->allow('read', 'App\Model\Cupon');
 			$app['authority']->allow('manage', 'App\Model\Cupon', function($self, Model\Cupon $cupon) {
@@ -199,13 +200,23 @@ class Cupon implements ControllerProviderInterface
 		});
 		
 		$controller->get('/{id}', function(Application $app, $id) {
-			$cupons = Model\Cupon::with('store')->find($id);
+			
+			$cupon = Model\Cupon::with('store')->find($id);
+			if (!$cupon)
+			{
+				throw new NotFoundHttpException("No existe el Cupon");
+			}
 			if (!$app['authority.cupon']->can('read', $cupon))
 			{
 				throw new AccessDeniedHttpException('Cannot read cupon');
 			}
 			
-			return new JsonResponse($cupons->toArray());
+			$redemptions = Model\Redemption
+				::where('cupon_id', '=', $cupon->id)
+				->count();
+			
+			$cupon->left = $cupon->stock - $redemptions;
+			return new JsonResponse($cupon->toArray());
 		});
 		
 		
