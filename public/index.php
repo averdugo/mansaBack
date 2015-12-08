@@ -17,7 +17,7 @@ if (isset($_ENV['ENVIRONMENT']))
 }
 else
 {
-	$database = @$phinx['environments']['default_database'];
+	$database = @$phinx['environments'][@$phinx['environments']['default_database']];
 }
 
 
@@ -37,6 +37,7 @@ $app->register(
 	]]
 );
 
+
 $app->register(new Silex\Provider\SessionServiceProvider());
 
 $app->mount('/user', new App\Controller\Login);
@@ -45,6 +46,7 @@ $app->mount('/cupon', new App\Controller\Cupon);
 $app->mount('/device', new App\Controller\Device);
 $app->mount('/image', new App\Controller\Image);
 $app->mount('/redemption', new App\Controller\Redemption);
+
 
 $app['capsule'];
 
