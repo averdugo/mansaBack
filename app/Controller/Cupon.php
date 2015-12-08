@@ -41,12 +41,13 @@ class Cupon implements ControllerProviderInterface
 				$cupon->image()->associate($image);
 			}
 			
-			$cupon->store_id = $req->get('store_id');
-			$cupon->description = $req->get('description');
-			$cupon->price = $req->get('price');
-			$cupon->stock = $req->get('stock');
-			$cupon->save();
+			$cupon->store_id	= $req->get('store_id');
+			$cupon->expires_at	= $req->get('expires_at');
+			$cupon->description	= $req->get('description');
+			$cupon->price		= $req->get('price');
+			$cupon->stock		= $req->get('stock');
 			
+			$cupon->save();
 			return new JsonResponse($cupon->toArray());
 		});
 		
