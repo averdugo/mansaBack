@@ -38,7 +38,9 @@ class View
 	{
 		ob_start();
 		extract($this->data);
-		include __DIR__ . '/View/' . $this->tmpl . '.php';
+		include __DIR__ . '/View/' . 
+			implode("/", array_map('ucfirst', explode("/", $this->tmpl))) .
+			'.php';
 		return ob_get_clean();
 	}
 }
