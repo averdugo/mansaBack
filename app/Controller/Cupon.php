@@ -165,6 +165,11 @@ class Cupon implements ControllerProviderInterface
 			return new JsonResponse($cupons->toArray());
 		});
 		
+		$controller->get('/view/{id}', function(Application $app, $id) {
+			$cupons = Model\Cupon::with('store')->find($id);
+			return new JsonResponse($cupons->toArray());
+		});
+		
 		$controller->get('/{id}', function(Application $app, $id) {
 			
 			$cupon = Model\Cupon::with('store')->find($id);
