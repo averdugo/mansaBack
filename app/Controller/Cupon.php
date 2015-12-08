@@ -166,8 +166,18 @@ class Cupon implements ControllerProviderInterface
 		});
 		
 		$controller->get('/view/{id}', function(Application $app, $id) {
-			$cupons = Model\Cupon::with('store')->find($id);
-			return new JsonResponse($cupons->toArray());
+			$cupon = Model\Cupon::with('store')->find($id);
+			if (!$cupon)
+			{
+				throw new NotFoundHttpException("No existe el Cupon");
+			}
+			
+			$redemptions = Model\Redemption
+				::where('cupon_id', '=', $cupon->id)
+				->count();
+			$cupon->left = $cupon->stock - $redemptions;
+			
+			return (new \App\View('cupon/view'))->cupon($cupon);
 		});
 		
 		$controller->get('/{id}', function(Application $app, $id) {
