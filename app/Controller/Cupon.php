@@ -41,12 +41,13 @@ class Cupon implements ControllerProviderInterface
 				$cupon->image()->associate($image);
 			}
 			
-			$cupon->store_id = $req->get('store_id');
-			$cupon->description = $req->get('description');
-			$cupon->price = $req->get('price');
-			$cupon->stock = $req->get('stock');
-			$cupon->save();
+			$cupon->store_id	= $req->get('store_id');
+			$cupon->expires_at	= $req->get('expires_at');
+			$cupon->description	= $req->get('description');
+			$cupon->price		= $req->get('price');
+			$cupon->stock		= $req->get('stock');
 			
+			$cupon->save();
 			return new JsonResponse($cupon->toArray());
 		});
 		
@@ -162,6 +163,21 @@ class Cupon implements ControllerProviderInterface
 			
 			$cupons = $query->get();
 			return new JsonResponse($cupons->toArray());
+		});
+		
+		$controller->get('/view/{id}', function(Application $app, $id) {
+			$cupon = Model\Cupon::with('store')->find($id);
+			if (!$cupon)
+			{
+				throw new NotFoundHttpException("No existe el Cupon");
+			}
+			
+			$redemptions = Model\Redemption
+				::where('cupon_id', '=', $cupon->id)
+				->count();
+			$cupon->left = $cupon->stock - $redemptions;
+			
+			return (new \App\View('cupon/view'))->cupon($cupon);
 		});
 		
 		$controller->get('/{id}', function(Application $app, $id) {
