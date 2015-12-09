@@ -1,0 +1,22 @@
+{
+  "name": "mansapromo-backend",
+  "authors": [
+    "Phillip Whelan <pwhelan@mixxx.org>"
+  ],
+  "description": "MansaPromo Chile Backend",
+  "main": "",
+  "moduleType": [],
+  "license": "MIT",
+  "homepage": "http://www.mansapromo.cl",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "bootstrap": "~3.3.6"
+  }
+}
