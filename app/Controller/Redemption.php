@@ -58,7 +58,16 @@ class Redemption implements ControllerProviderInterface
 				throw new NotFoundHttpException('no such redemption');
 			}
 			
-			$redemption->is_confirmed = $req->get('is_confirmed');
+			if ($req->request->has('rating'))
+			{
+				$redemption->rating = $req->rquest->get('rating');
+			}
+			
+			if ($req->request->has('is_confirmed'))
+			{
+				$redemption->is_confirmed = $req->get('is_confirmed');
+			}
+			
 			$redemption->save();
 			
 			return new JsonResponse($redemption->toArray());
