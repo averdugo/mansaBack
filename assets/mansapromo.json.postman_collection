@@ -112,12 +112,12 @@
 			"tests": "",
 			"currentHelper": "normal",
 			"helperAttributes": {},
-			"time": 1446327558974,
+			"time": 1446693357631,
 			"name": "Create Store",
 			"description": "",
 			"collectionId": "ec3c18e9-ab1c-34e2-b42f-54be8f366484",
 			"responses": [],
-			"rawModeData": "{\n    \"address\": \"Apoquindo\",\n    \"name\": \"Pegandole al Asfalto\",\n    \"phone\": \"56968180792\",\n    \"comuna\": \"Las Condas\",\n    \"region\": \"RM\",\n    \"lat\": -33.395954,\n    \"lon\": -70.499499,\n    \"hours\": [\n        {\"from\": 1, \"to\": 5, \"open\": \"10:00\", \"close\": \"01:00\" },\n        {\"from\": 6, \"to\": 0, \"open\": \"11:00\", \"close\": \"00:00\" }\n    ]\n}\n"
+			"rawModeData": "{\n    \"address\": \"Apoquindo\",\n    \"name\": \"Pegandole al Asfalto\",\n    \"phone\": \"56968180792\",\n    \"comuna\": \"Las Condas\",\n    \"region\": \"RM\",\n    \"storetype_id\": 5,\n    \"lat\": -33.395954,\n    \"lon\": -70.499499,\n    \"hours\": [\n        {\"from\": 1, \"to\": 5, \"open\": \"10:00\", \"close\": \"01:00\" },\n        {\"from\": 6, \"to\": 0, \"open\": \"11:00\", \"close\": \"00:00\" }\n    ]\n}\n"
 		},
 		{
 			"id": "70e681a4-ab87-c1ac-6f18-81985de0b9e7",

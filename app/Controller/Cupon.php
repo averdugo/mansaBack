@@ -166,7 +166,8 @@ class Cupon implements ControllerProviderInterface
 		});
 		
 		$controller->get('/view/{id}', function(Application $app, $id) {
-			$cupon = Model\Cupon::with('store')->find($id);
+			
+			$cupon = Model\Cupon::withExpired()->with('store')->find($id);
 			if (!$cupon)
 			{
 				throw new NotFoundHttpException("No existe el Cupon");
@@ -182,7 +183,7 @@ class Cupon implements ControllerProviderInterface
 		
 		$controller->get('/{id}', function(Application $app, $id) {
 			
-			$cupon = Model\Cupon::with('store')->find($id);
+			$cupon = Model\Cupon::withExpired()->with('store')->find($id);
 			if (!$cupon)
 			{
 				throw new NotFoundHttpException("No existe el Cupon");
