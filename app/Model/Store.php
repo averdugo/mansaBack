@@ -27,6 +27,11 @@ class StoreCoordinatesScope implements ScopeInterface
 	
 	public function remove(Builder $builder)
 	{
+		if (!isset($builder->columns))
+		{
+			return;
+		}
+		
 		foreach ($builder->columns as $idx => $column)
 		{
 			if ($column instanceof StoreCoordinatesExpression)
