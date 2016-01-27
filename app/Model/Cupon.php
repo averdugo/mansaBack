@@ -22,6 +22,6 @@ class Cupon extends AbstractBase
 	
 	public function getHasExpiredAttribute()
 	{
-		return $this->expires_at->lt(\Carbon\Carbon::now());
+		return $this->expires_at && $this->expires_at->lt(\Carbon\Carbon::now());
 	}
 }
