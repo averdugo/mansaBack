@@ -181,9 +181,48 @@ class Cupon implements ControllerProviderInterface
 			return (new \App\View('cupon/view'))->cupon($cupon);
 		});
 		
-		$controller->get('/{id}', function(Application $app, $id) {
+		$controller->get('/{id}', function(Application $app, Request $req, $id) {
 			
-			$cupon = Model\Cupon::withExpired()->with('store')->find($id);
+			$db = $app['capsule']->connection();
+			$query = Model\Cupon::withExpired();
+			
+			if ($req->get('g'))
+			{
+				$parts = explode(',', $req->get('g'));
+				$geo = (object)[
+					'lat'	=> $parts[0],
+					'lon'	=> $parts[1]
+				];
+				
+				foreach ($geo as $key => $val)
+				{
+					if (!is_numeric($val))
+					{
+						throw new \Exception('invalid value: '.$key);
+					}
+				}
+			}
+			else 
+			{
+				$geo = null;
+			}
+			
+			$query->with(['store' => function($q) use ($db, $geo) {
+				
+				if ($geo)
+				{
+					$q->addSelect(
+						$db->raw('ST_Distance('.
+							'location::geometry'.
+							", ST_GeographyFromText('SRID=4326;POINT({$geo->lat} {$geo->lon})')) ".
+							"as distance"
+						)
+					);
+				}
+				
+			}]);
+			
+			$cupon = $query->find($id);
 			if (!$cupon)
 			{
 				throw new NotFoundHttpException("No existe el Cupon");
