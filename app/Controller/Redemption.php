@@ -32,13 +32,16 @@ class Redemption implements ControllerProviderInterface
 				throw new NotFoundHttpException("No existe el Cupon");
 			}
 			
-			$count = Model\Redemption
-				::where('cupon_id', '=', $cupon->id)
-				->count();
-			
-			if ($count >= $cupon->stock)
+			if ($cupon->stock !== null)
 			{
-				throw new \Exception("cupon se ha quedado sin stock");
+				$count = Model\Redemption
+					::where('cupon_id', '=', $cupon->id)
+					->count();
+				
+				if ($count >= $cupon->stock)
+				{
+					throw new \Exception("cupon se ha quedado sin stock");
+				}
 			}
 			
 			$redemption = new Model\Redemption;

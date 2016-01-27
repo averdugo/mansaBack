@@ -174,10 +174,13 @@ class Cupon implements ControllerProviderInterface
 				throw new NotFoundHttpException("No existe el Cupon");
 			}
 			
-			$redemptions = Model\Redemption
-				::where('cupon_id', '=', $cupon->id)
-				->count();
-			$cupon->left = $cupon->stock - $redemptions;
+			if ($cupon->stock !== null)
+			{
+				$redemptions = Model\Redemption
+					::where('cupon_id', '=', $cupon->id)
+					->count();
+				$cupon->left = $cupon->stock - $redemptions;
+			}
 			
 			return (new \App\View('cupon/view'))->cupon($cupon);
 		});
@@ -229,12 +232,14 @@ class Cupon implements ControllerProviderInterface
 				throw new NotFoundHttpException("No existe el Cupon");
 			}
 			
-			$redemptions = Model\Redemption
-				::where('cupon_id', '=', $cupon->id)
-				->count();
-			
-			$cupon->left = $cupon->stock - $redemptions;
-			
+			if ($cupon->stock !== null)
+			{
+				$redemptions = Model\Redemption
+					::where('cupon_id', '=', $cupon->id)
+					->count();
+				
+				$cupon->left = $cupon->stock - $redemptions;
+			}	
 			
 			return new JsonResponse($cupon->toArray());
 		});
