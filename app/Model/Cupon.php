@@ -15,11 +15,6 @@ class Cupon extends AbstractBase
 	protected $appends = ['has_expired'];
 	
 	
-	protected function getDateFormat()
-	{
-		return 'Y-m-d H:i:s.u';
-	}
-	
 	public function store()
 	{
 		return $this->belongsTo('App\Model\Store');
