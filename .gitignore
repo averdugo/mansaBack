@@ -5,3 +5,4 @@ DEADJOE
 /composer.lock
 
 /phinx.yml
+/public/js/lib/

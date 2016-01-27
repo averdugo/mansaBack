@@ -69,13 +69,16 @@ class Redemption implements ControllerProviderInterface
 				throw new NotFoundHttpException("No existe el Cupon");
 			}
 			
-			$count = Model\Redemption
-				::where('cupon_id', '=', $cupon->id)
-				->count();
-			
-			if ($count >= $cupon->stock)
+			if ($cupon->stock !== null)
 			{
-				throw new \Exception("cupon se ha quedado sin stock");
+				$count = Model\Redemption
+					::where('cupon_id', '=', $cupon->id)
+					->count();
+				
+				if ($count >= $cupon->stock)
+				{
+					throw new \Exception("cupon se ha quedado sin stock");
+				}
 			}
 			
 			$redemption = new Model\Redemption;
@@ -100,12 +103,20 @@ class Redemption implements ControllerProviderInterface
 				throw new NotFoundHttpException('no such redemption');
 			}
 			
-			$redemption->is_confirmed = $req->get('is_confirmed');
-			
 			
 			if (!$app['authority.redemption']->can('update', $redemption))
 			{
 				throw new AccessDeniedHttpException('Unable to update redemption');
+			}
+			
+			if ($req->request->has('rating'))
+			{
+				$redemption->rating = $req->rquest->get('rating');
+			}
+			
+			if ($req->request->has('is_confirmed'))
+			{
+				$redemption->is_confirmed = $req->get('is_confirmed');
 			}
 			
 			$redemption->save();

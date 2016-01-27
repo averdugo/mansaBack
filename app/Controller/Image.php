@@ -25,7 +25,6 @@ class Image implements ControllerProviderInterface
 		$imgmgr = new \Intervention\Image\ImageManager;
 		$controller->put('/', function(Application $app, Request $req) use ($imgmgr) {
 			
-			
 			if (
 				$req->headers->has('x-content-transfer-encoding') && 
 				!$req->headers->has('x-content-transfer-encoding')
@@ -42,16 +41,36 @@ class Image implements ControllerProviderInterface
 				$req->setContent(base64_decode($req->getContent()));
 			}
 			
+			$img	= $imgmgr->make($req->getContent());
 			
-			$image = new Model\Image;
-			$img = $imgmgr->make($req->getContent());
-			$image->mimetype = $img->mime();
-			$image->login_id = $app['session']->get('user_id');
-			$image->data = $req->getContent();
-			
+			$image			= new Model\Image;
+			$image->mimetype	= $img->mime();
+			$image->login_id	= $app['session']->get('user_id');
+			$image->data		= $req->getContent();
 			$image->save();
 			
 			return new JsonResponse($image->toArray());
+		});
+		
+		$controller->get('/scale/{sx}/{sy}/{id}', function(Request $req, $sx, $sy, $id) use ($imgmgr) {
+			
+			$image = Model\Image::find($id);
+			if (!$image)
+			{
+				return new NotFoundHttpException('No such image');
+			}
+			
+			
+			$img = $imgmgr->make(base64_decode($image->data));
+			$img->resize($sx,$sy);
+			
+			return new Response(
+				$img->encode('jpg'), 200, 
+				[
+					'Content-Type'	=> 'image/jpeg',
+					'Expires'	=> 'Thu, 25 Dec 2025 13:37:00 GMT'
+				]
+			);
 		});
 		
 		$controller->get('/{id}', function(Request $req, $id) use ($imgmgr) {
@@ -81,7 +100,10 @@ class Image implements ControllerProviderInterface
 			
 			return new Response(
 				$img->encode('jpg'), 200, 
-				['Content-Type' => 'image/jpeg']
+				[
+					'Content-Type'	=> 'image/jpeg',
+					'Expires'	=> 'Thu, 25 Dec 2025 13:37:00 GMT'
+				]
 			);
 		});
 		

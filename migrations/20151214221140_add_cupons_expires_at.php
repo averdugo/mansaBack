@@ -2,7 +2,7 @@
 
 use Phinx\Migration\AbstractMigration;
 
-class AddImageIdReferences extends AbstractMigration
+class AddCuponsExpiresAt extends AbstractMigration
 {
 	/**
 	 * Change Method.
@@ -27,13 +27,8 @@ class AddImageIdReferences extends AbstractMigration
 	 */
 	public function change()
 	{
-		foreach(['cupons', 'stores'] as $tablename)
-		{
-			$this->table($tablename)
-				->addColumn('image_id', 'integer', ['null' => true])
-				->addForeignKey('image_id', 'images', 'id',
-					['delete'=> 'NO_ACTION', 'update'=> 'NO_ACTION'])
-				->update();
-		}
+		$this->table('cupons')
+			->addColumn('expires_at', 'datetime', ['null' => TRUE])
+			->save();
 	}
 }

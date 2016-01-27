@@ -20,7 +20,7 @@ if (isset($_ENV['ENVIRONMENT']))
 }
 else
 {
-	$database = @$phinx['environments']['default_database'];
+	$database = @$phinx['environments'][@$phinx['environments']['default_database']];
 }
 
 
@@ -40,6 +40,7 @@ $app->register(
 	]]
 );
 
+
 $app->register(new Silex\Provider\SessionServiceProvider());
 
 $app->mount('/user', new App\Controller\Login);
@@ -48,6 +49,8 @@ $app->mount('/cupon', new App\Controller\Cupon);
 $app->mount('/device', new App\Controller\Device);
 $app->mount('/image', new App\Controller\Image);
 $app->mount('/redemption', new App\Controller\Redemption);
+$app->mount('/slideshow', new App\Controller\Slideshow);
+
 
 $app['capsule'];
 
@@ -68,7 +71,7 @@ $app->before(function (Request $request, Application $app) {
 		$response = new Response();
 		$response->headers->set("Access-Control-Allow-Origin","*");
 		$response->headers->set("Access-Control-Allow-Methods","GET,POST,PUT,DELETE,OPTIONS");
-		$response->headers->set("Access-Control-Allow-Headers","Content-Type");
+		$response->headers->set("Access-Control-Allow-Headers","Content-Type,X-DEVICE-ID");
 		$response->setStatusCode(200);
 		return $response;
 	}

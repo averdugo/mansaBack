@@ -63,19 +63,21 @@ class Cupon implements ControllerProviderInterface
 				$cupon->image()->associate($image);
 			}
 			
-			$cupon->store_id = $req->get('store_id');
-			$cupon->description = $req->get('description');
-			$cupon->price = $req->get('price');
-			$cupon->stock = $req->get('stock');
 			
+			$cupon->store_id	= $req->get('store_id');
+			$cupon->expires_at	= $req->get('expires_at');
+			$cupon->title		= $req->get('title');
+			$cupon->description	= $req->get('description');
+			$cupon->price		= $req->get('price');
+			$cupon->stock		= $req->get('stock');
 			
 			if (!$app['authority.cupon']->can('create', $cupon))
 			{
 				throw new AccessDeniedHttpException('Cannot create cupon (for this store)');
 			}
 			
-			$cupon->save();
 			
+			$cupon->save();
 			return new JsonResponse($cupon->toArray());
 		});
 		
@@ -153,7 +155,7 @@ class Cupon implements ControllerProviderInterface
 			if ($req->get('q'))
 			{
 				$query->whereRaw(
-					"to_tsvector('english', description) @@ plainto_tsquery(?)",
+					"to_tsvector('english', title || ' ' || description) @@ plainto_tsquery(?)",
 					[$req->get('q')]
 				);
 			}
@@ -199,9 +201,9 @@ class Cupon implements ControllerProviderInterface
 			return new JsonResponse($cupons->toArray());
 		});
 		
-		$controller->get('/{id}', function(Application $app, $id) {
+		$controller->get('/view/{id}', function(Application $app, $id) {
 			
-			$cupon = Model\Cupon::with('store')->find($id);
+			$cupon = Model\Cupon::withExpired()->with('store')->find($id);
 			if (!$cupon)
 			{
 				throw new NotFoundHttpException("No existe el Cupon");
@@ -211,11 +213,73 @@ class Cupon implements ControllerProviderInterface
 				throw new AccessDeniedHttpException('Cannot read cupon');
 			}
 			
-			$redemptions = Model\Redemption
-				::where('cupon_id', '=', $cupon->id)
-				->count();
+			if ($cupon->stock !== null)
+			{
+				$redemptions = Model\Redemption
+					::where('cupon_id', '=', $cupon->id)
+					->count();
+				$cupon->left = $cupon->stock - $redemptions;
+			}
 			
-			$cupon->left = $cupon->stock - $redemptions;
+			return (new \App\View('cupon/view'))->cupon($cupon);
+		});
+		
+		$controller->get('/{id}', function(Application $app, Request $req, $id) {
+			
+			$db = $app['capsule']->connection();
+			$query = Model\Cupon::withExpired();
+			
+			if ($req->get('g'))
+			{
+				$parts = explode(',', $req->get('g'));
+				$geo = (object)[
+					'lat'	=> $parts[0],
+					'lon'	=> $parts[1]
+				];
+				
+				foreach ($geo as $key => $val)
+				{
+					if (!is_numeric($val))
+					{
+						throw new \Exception('invalid value: '.$key);
+					}
+				}
+			}
+			else 
+			{
+				$geo = null;
+			}
+			
+			$query->with(['store' => function($q) use ($db, $geo) {
+				
+				if ($geo)
+				{
+					$q->addSelect(
+						$db->raw('ST_Distance('.
+							'location::geometry'.
+							", ST_GeographyFromText('SRID=4326;POINT({$geo->lat} {$geo->lon})')) ".
+							"as distance"
+						)
+					);
+				}
+				
+			}]);
+			
+			$cupon = $query->find($id);
+			if (!$cupon)
+			{
+				throw new NotFoundHttpException("No existe el Cupon");
+			}
+			
+			if ($cupon->stock !== null)
+			{
+				$redemptions = Model\Redemption
+					::where('cupon_id', '=', $cupon->id)
+					->count();
+				
+				$cupon->left = $cupon->stock - $redemptions;
+			}	
+			
 			return new JsonResponse($cupon->toArray());
 		});
 		
