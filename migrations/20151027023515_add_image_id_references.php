@@ -32,7 +32,7 @@ class AddImageIdReferences extends AbstractMigration
 			$this->table($tablename)
 				->addColumn('image_id', 'integer', ['null' => true])
 				->addForeignKey('image_id', 'images', 'id',
-	                                ['delete'=> 'NO_ACTION', 'update'=> 'NO_ACTION'])
+					['delete'=> 'NO_ACTION', 'update'=> 'NO_ACTION'])
 				->update();
 		}
 	}
