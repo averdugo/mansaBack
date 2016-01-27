@@ -10,7 +10,7 @@ class ExpiredScope implements ScopeInterface
 {
 	public function apply(Builder $builder)
 	{
-		$builder->whereRaw('expires_at > NOW() OR expires_at IS NULL');
+		$builder->whereRaw('(expires_at > NOW() OR expires_at IS NULL)');
 	}
 	
 	public function remove(Builder $builder)
