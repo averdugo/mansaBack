@@ -346,7 +346,7 @@ class AddStoreLogo extends AbstractMigration
 		]);
 		
 		$default = $st->fetchObject();
-		
+		$pdo->commit();
 		
 		$table
 			->addColumn('logo_id', 'integer', ['null' => false, 'default' => $default->id])
