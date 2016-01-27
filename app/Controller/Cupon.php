@@ -43,6 +43,7 @@ class Cupon implements ControllerProviderInterface
 			
 			$cupon->store_id	= $req->get('store_id');
 			$cupon->expires_at	= $req->get('expires_at');
+			$cupon->title		= $req->get('title');
 			$cupon->description	= $req->get('description');
 			$cupon->price		= $req->get('price');
 			$cupon->stock		= $req->get('stock');
@@ -125,7 +126,7 @@ class Cupon implements ControllerProviderInterface
 			if ($req->get('q'))
 			{
 				$query->whereRaw(
-					"to_tsvector('english', description) @@ plainto_tsquery(?)",
+					"to_tsvector('english', title || ' ' || description) @@ plainto_tsquery(?)",
 					[$req->get('q')]
 				);
 			}
