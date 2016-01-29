@@ -5,8 +5,7 @@
 		"robmorgan/phinx": "0.4.6",
 		"symfony/yaml": "2.7.*",
 		"intervention/image": "2.3.*",
-		"ramsey/uuid": "^2.8",
-		"authority-php/authority": "2.1.*"
+		"ramsey/uuid": "^2.8"
 	},
 	"autoload": {
 		"psr-4": {
