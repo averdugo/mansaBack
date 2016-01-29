@@ -47,6 +47,7 @@ $app->mount('/device', new App\Controller\Device);
 $app->mount('/image', new App\Controller\Image);
 $app->mount('/redemption', new App\Controller\Redemption);
 $app->mount('/slideshow', new App\Controller\Slideshow);
+$app->mount('/region', new App\Controller\Region);
 
 
 $app['capsule'];
