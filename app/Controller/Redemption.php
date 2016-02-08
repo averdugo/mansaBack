@@ -248,6 +248,25 @@ class Redemption implements ControllerProviderInterface
 			return new JsonResponse($redemption->toArray());
 		});
 		
+		$controller->get("/device/{device_id}/{cupon_id}", function(App $app, Request $req, $device_id, $cupon_id) {
+			
+			$redemption = Model\Redemption
+					::where('device_id', '=', $device_id)
+					->where('cupon_id', '=', $cupon_id)
+				->first();
+			
+			if (!$redemption)
+			{
+				throw new NotFoundHttpException('no such redemption.');
+			}
+			
+			if (!$app['authority.redemption']->can('read', $redemption))
+			{
+				throw new AccessDeniedHttpException('Permission denied.');
+			}
+			
+			return new JsonResponse($redemption->toArray());
+		});
 		
 		return $controller;
 	}
