@@ -207,18 +207,32 @@ class Redemption implements ControllerProviderInterface
 			}
 			
 			
-			$redemptions = array_filter(
+			$redemptions = $query->get();
+			if (count($redemptions) <= 0)
+			{
+				throw new NotFoundHttpException('no such redemption.');
+			}
+			
+			
+			$redemptions = $redemptions->filter(
 				function($redemption) use ($app) {
 					return $app['authority.redemption']
 						->can('read', $redemption);
-				},
-				$query->get()
+				}
 			);
+			
+			if (count($redemptions) <= 0)
+			{
+				throw new AccessDeniedHttpException('Permission denied.');
+			}
 			
 			
 			$resp->headers->set('X-Total-Count', $count);
 			$resp->headers->set('X-Total-Pages', $count/$perpage);
-			$resp->setData($redemptions->toArray());
+			$resp->setData($redemptions ?
+				$redemptions->toArray() :
+				[]
+			);
 			
 			return $resp;
 		});
