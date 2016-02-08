@@ -2,7 +2,7 @@
 
 namespace App\Controller;
 
-use Silex\Application;
+use Silex\Application as App;
 use Silex\ControllerProviderInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
@@ -21,7 +21,7 @@ use App\Model;
 /******************************************************************************/
 class Redemption implements ControllerProviderInterface
 {
-	public function connect(Application $app)
+	public function connect(App $app)
 	{
 		$controller = $app['controllers_factory'];
 		
@@ -61,7 +61,7 @@ class Redemption implements ControllerProviderInterface
 			return $app['authority'];
 		};
 		
-		$controller->put("/", function(Request $req) {
+		$controller->put("/", function(App $app, Request $req) {
 			
 			$cupon = Model\Cupon::find($req->get('c'));
 			if (!$cupon)
@@ -95,7 +95,7 @@ class Redemption implements ControllerProviderInterface
 			return new JsonResponse($redemption->toArray());
 		});
 		
-		$controller->patch("/{id}", function(Request $req, $id) {
+		$controller->patch("/{id}", function(App $app, Request $req, $id) {
 			
 			$redemption = Model\Redemption::find($id);
 			if (!$redemption)
@@ -124,7 +124,7 @@ class Redemption implements ControllerProviderInterface
 			return new JsonResponse($redemption->toArray());
 		});
 		
-		$controller->get("/", function(Request $req) {
+		$controller->get("/", function(App $app, Request $req) {
 			
 			$perpage = 50;
 			if ($req->get('perpage'))
@@ -211,7 +211,7 @@ class Redemption implements ControllerProviderInterface
 			return $resp;
 		});
 		
-		$controller->get("/{id}", function(Request $req, $id) {
+		$controller->get("/{id}", function(App $app, Request $req, $id) {
 			
 			$redemption = Model\Redemption::find($id);
 			if (!$app['authority.redemption']->can('read', $redemption))
