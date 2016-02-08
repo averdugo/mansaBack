@@ -48,8 +48,25 @@ class Redemption implements ControllerProviderInterface
 				function($self, Model\Redemption $redemption) {
 					
 					$changed = array_keys($redemption->getDirty());
+					if (count($changed) == 0)
+					{
+						return true;
+					}
 					
-					if (count($changed) == 1 && $changed[0] == 'is_redeemed')
+					$notallowed = array_filter(
+						$changed,
+						function($change) {
+							switch($change)
+							{
+							case 'rating':
+								return false;
+							default:
+								return true;
+							}
+						}
+					);
+					
+					if (count($notallowed) == 0)
 					{
 						return true;
 					}
@@ -104,19 +121,14 @@ class Redemption implements ControllerProviderInterface
 			}
 			
 			
-			if (!$app['authority.redemption']->can('update', $redemption))
-			{
-				throw new AccessDeniedHttpException('Unable to update redemption');
-			}
-			
 			if ($req->request->has('rating'))
 			{
 				$redemption->rating = $req->request->get('rating');
 			}
 			
-			if ($req->request->has('is_confirmed'))
+			if (!$app['authority.redemption']->can('update', $redemption))
 			{
-				$redemption->is_confirmed = $req->get('is_confirmed');
+				throw new AccessDeniedHttpException('Unable to update redemption');
 			}
 			
 			$redemption->save();
