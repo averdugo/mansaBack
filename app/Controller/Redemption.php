@@ -111,7 +111,7 @@ class Redemption implements ControllerProviderInterface
 			
 			if ($req->request->has('rating'))
 			{
-				$redemption->rating = $req->rquest->get('rating');
+				$redemption->rating = $req->request->get('rating');
 			}
 			
 			if ($req->request->has('is_confirmed'))
