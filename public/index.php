@@ -91,7 +91,7 @@ $app->after(function (Request $req, Response $res) {
 
 $app->before(function(Request $req) {
 	
-	if ($req->headers->get('Content-Type') == 'application/json')
+	if (0 === strpos($req->headers->get('Content-Type'), 'application/json'))
 	{
 		$req->request->replace(
 			$req->getContent() ?
