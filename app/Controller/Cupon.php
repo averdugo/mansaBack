@@ -191,11 +191,10 @@ class Cupon implements ControllerProviderInterface
 			}
 			
 			
-			$cupons = array_filter(
+			$cupons = $query->get()->filter(
 				function($cupon) use ($app) {
 					return $app['authority.cupon']->can('read', $cupon);
-				},
-				$query->get()
+				}
 			);
 			
 			return new JsonResponse($cupons->toArray());
