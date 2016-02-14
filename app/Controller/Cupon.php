@@ -140,7 +140,7 @@ class Cupon implements ControllerProviderInterface
 				}
 			}]);
 			
-			
+			/*
 			if ($geo && $geo->dst)
 			{
 				$query->whereHas('store', function($q) use ($req, $geo) {
@@ -151,6 +151,7 @@ class Cupon implements ControllerProviderInterface
 					);
 				});
 			}
+			*/
 			
 			if ($req->get('q'))
 			{

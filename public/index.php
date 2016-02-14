@@ -71,7 +71,7 @@ $app->before(function (Request $request, Application $app) {
 	if ($request->getMethod() === "OPTIONS") {
 		$response = new Response();
 		$response->headers->set("Access-Control-Allow-Origin","*");
-		$response->headers->set("Access-Control-Allow-Methods","GET,POST,PUT,DELETE,OPTIONS");
+		$response->headers->set("Access-Control-Allow-Methods","GET,POST,PUT,DELETE,OPTIONS,PATCH");
 		$response->headers->set("Access-Control-Allow-Headers","Content-Type,X-DEVICE-ID");
 		$response->setStatusCode(200);
 		return $response;
@@ -85,7 +85,7 @@ $app->after(function (Request $req, Response $res) {
 	if ($req->getMethod() != "OPTIONS")
 	{
 		$res->headers->set("Access-Control-Allow-Origin","*");
-		$res->headers->set("Access-Control-Allow-Methods","GET,POST,PUT,DELETE,OPTIONS");
+		$res->headers->set("Access-Control-Allow-Methods","GET,POST,PUT,DELETE,OPTIONS,PATCH");
 	}
 });
 

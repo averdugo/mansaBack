@@ -243,11 +243,13 @@ class Store implements ControllerProviderInterface
 							", ST_GeographyFromText('SRID=4326;POINT({$geo->lat} {$geo->lon})')) ".
 							"as distance"
 						)
-					)
+					);
+					/*
 					->whereRaw(
 						"ST_DWithin(location, ST_GeographyFromText(?), ?)",
 						["SRID=4326;POINT({$geo->lat} {$geo->lon})", $geo->distance]
 					);
+					*/
 			}
 			else
 			{
