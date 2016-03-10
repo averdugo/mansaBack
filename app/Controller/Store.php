@@ -25,32 +25,29 @@ class Store implements ControllerProviderInterface
 		$controller = $app['controllers_factory'];
 		
 		
-		$app['authority.redemption'] = function($app) {
+		$app['authority.store'] = function($app) {
 			
-			$app['authority']->allow('read', 'App\Model\Redemption',
-				// TODO: restrict access to redemptions to the
-				// redeeming user and/or store owners...
-				function($self, Model\Redemption $redemption) {
+			$app['authority']->allow('read', 'App\Model\Store',
+				function($self, Model\Store $store) {
 					return true;
 				}
 			);
 			
-			$app['authority']->allow('create', 'App\Model\Redemption', 
-				function($self, Model\Redemption $redemption) {
-					return $self->user()->stores()
-						->where('id', '=', $redemption->cupon->store_id)
-						->count() >= 1;
+			$app['authority']->allow('create', 'App\Model\Store', 
+				function($self, Model\Store $store) {
+					return $self->user() != NULL;
 				}
 			);
 			
-			$app['authority']->allow('update', 'App\Model\Redemption',
-				function($self, Model\Redemption $redemption) {
+			$app['authority']->allow('update', 'App\Model\Store',
+				function($self, Model\Store $store) {
 					
-					$changed = array_keys($redemption->getDirty());
-					
-					if (count($changed) == 1 && $changed[0] == 'is_redeemed')
+					if ($self->user())
 					{
-						return true;
+						if (in_array($store->id, $self->user()->stores->lists('id')))
+						{
+							return true;
+						}
 					}
 					
 					return false;
@@ -59,28 +56,6 @@ class Store implements ControllerProviderInterface
 			
 			return $app['authority'];
 		};
-		
-		$app['authority.cupon'] = function($app) {
-			
-			$app['authority']->addAlias('manage', ['create', 'update', 'delete']);
-			
-			$app['authority']->allow('read', 'App\Model\Cupon');
-			$app['authority']->allow('manage', 'App\Model\Cupon', function($self, Model\Cupon $cupon) {
-				
-				$canStore = $self->user()->stores()
-					->where('id', '=', $cupon->store_id)
-					->count() >= 1;
-				
-				$canImage = $cupon->image_id ?
-					$self->user()->id == $cupon->image->login_id :
-					true;
-				
-				return $canStore && $canImage;
-			});
-			
-			return $app['authority'];
-		};
-		
 		
 		$controller->put('/', function(Application $app, Request $req) {
 			
