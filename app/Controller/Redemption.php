@@ -2,13 +2,14 @@
 
 namespace App\Controller;
 
-use Silex\Application;
+use Silex\Application as App;
 use Silex\ControllerProviderInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Request;
 
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 
 use App\Model;
 
@@ -20,11 +21,64 @@ use App\Model;
 /******************************************************************************/
 class Redemption implements ControllerProviderInterface
 {
-	public function connect(Application $app)
+	public function connect(App $app)
 	{
 		$controller = $app['controllers_factory'];
 		
-		$controller->put("/", function(Request $req) {
+		
+		$app['authority.redemption'] = function($app) {
+			
+			$app['authority']->allow('read', 'App\Model\Redemption',
+				// TODO: restrict access to redemptions to the
+				// redeeming user and/or store owners...
+				function($self, Model\Redemption $redemption) {
+					return true;
+				}
+			);
+			
+			$app['authority']->allow('create', 'App\Model\Redemption', 
+				function($self, Model\Redemption $redemption) {
+					return $self->user()->stores()
+						->where('id', '=', $redemption->cupon->store_id)
+						->count() >= 1;
+				}
+			);
+			
+			$app['authority']->allow('update', 'App\Model\Redemption',
+				function($self, Model\Redemption $redemption) {
+					
+					$changed = array_keys($redemption->getDirty());
+					if (count($changed) == 0)
+					{
+						return true;
+					}
+					
+					$notallowed = array_filter(
+						$changed,
+						function($change) {
+							switch($change)
+							{
+							case 'rating':
+								return false;
+							default:
+								return true;
+							}
+						}
+					);
+					
+					if (count($notallowed) == 0)
+					{
+						return true;
+					}
+					
+					return false;
+				}
+			);
+			
+			return $app['authority'];
+		};
+		
+		$controller->put("/", function(App $app, Request $req) {
 			
 			$cupon = Model\Cupon::find($req->get('c'));
 			if (!$cupon)
@@ -48,12 +102,17 @@ class Redemption implements ControllerProviderInterface
 			$redemption->cupon()->associate($cupon);
 			$redemption->device_id = $req->get('d');
 			
+			if (!$app['authority.redemption']->can('create', $redemption))
+			{
+				throw new AccessDeniedHttpException('Unable to create redemption');
+			}
+			
 			$redemption->save();
 			
 			return new JsonResponse($redemption->toArray());
 		});
 		
-		$controller->patch("/{id}", function(Request $req, $id) {
+		$controller->patch("/{id}", function(App $app, Request $req, $id) {
 			
 			$redemption = Model\Redemption::find($id);
 			if (!$redemption)
@@ -61,14 +120,15 @@ class Redemption implements ControllerProviderInterface
 				throw new NotFoundHttpException('no such redemption');
 			}
 			
+			
 			if ($req->request->has('rating'))
 			{
-				$redemption->rating = $req->rquest->get('rating');
+				$redemption->rating = $req->request->get('rating');
 			}
 			
-			if ($req->request->has('is_confirmed'))
+			if (!$app['authority.redemption']->can('update', $redemption))
 			{
-				$redemption->is_confirmed = $req->get('is_confirmed');
+				throw new AccessDeniedHttpException('Unable to update redemption');
 			}
 			
 			$redemption->save();
@@ -76,7 +136,7 @@ class Redemption implements ControllerProviderInterface
 			return new JsonResponse($redemption->toArray());
 		});
 		
-		$controller->get("/", function(Request $req) {
+		$controller->get("/", function(App $app, Request $req) {
 			
 			$perpage = 50;
 			if ($req->get('perpage'))
@@ -146,18 +206,67 @@ class Redemption implements ControllerProviderInterface
 				$resp->headers->set('Link', implode(', ', $links));
 			}
 			
+			
+			$redemptions = $query->get();
+			if (count($redemptions) <= 0)
+			{
+				throw new NotFoundHttpException('no such redemption.');
+			}
+			
+			
+			$redemptions = $redemptions->filter(
+				function($redemption) use ($app) {
+					return $app['authority.redemption']
+						->can('read', $redemption);
+				}
+			);
+			
+			if (count($redemptions) <= 0)
+			{
+				throw new AccessDeniedHttpException('Permission denied.');
+			}
+			
+			
 			$resp->headers->set('X-Total-Count', $count);
 			$resp->headers->set('X-Total-Pages', $count/$perpage);
-			$resp->setData($query->get()->toArray());
+			$resp->setData($redemptions ?
+				$redemptions->toArray() :
+				[]
+			);
 			
 			return $resp;
 		});
 		
-		$controller->get("/{id}", function(Request $req, $id) {
+		$controller->get("/{id}", function(App $app, Request $req, $id) {
+			
 			$redemption = Model\Redemption::find($id);
+			if (!$app['authority.redemption']->can('read', $redemption))
+			{
+				throw new AccessDeniedHttpException('Unable to update redemption');
+			}
+			
 			return new JsonResponse($redemption->toArray());
 		});
 		
+		$controller->get("/device/{device_id}/{cupon_id}", function(App $app, Request $req, $device_id, $cupon_id) {
+			
+			$redemption = Model\Redemption
+					::where('device_id', '=', $device_id)
+					->where('cupon_id', '=', $cupon_id)
+				->first();
+			
+			if (!$redemption)
+			{
+				throw new NotFoundHttpException('no such redemption.');
+			}
+			
+			if (!$app['authority.redemption']->can('read', $redemption))
+			{
+				throw new AccessDeniedHttpException('Permission denied.');
+			}
+			
+			return new JsonResponse($redemption->toArray());
+		});
 		
 		return $controller;
 	}

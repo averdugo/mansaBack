@@ -24,6 +24,39 @@ class Store implements ControllerProviderInterface
 	{
 		$controller = $app['controllers_factory'];
 		
+		
+		$app['authority.store'] = function($app) {
+			
+			$app['authority']->allow('read', 'App\Model\Store',
+				function($self, Model\Store $store) {
+					return true;
+				}
+			);
+			
+			$app['authority']->allow('create', 'App\Model\Store', 
+				function($self, Model\Store $store) {
+					return $self->user() != NULL;
+				}
+			);
+			
+			$app['authority']->allow('update', 'App\Model\Store',
+				function($self, Model\Store $store) {
+					
+					if ($self->user())
+					{
+						if (in_array($store->id, $self->user()->stores->lists('id')))
+						{
+							return true;
+						}
+					}
+					
+					return false;
+				}
+			);
+			
+			return $app['authority'];
+		};
+		
 		$controller->put('/', function(Application $app, Request $req) {
 			
 			$db = $app['capsule']->connection();
@@ -185,11 +218,13 @@ class Store implements ControllerProviderInterface
 							", ST_GeographyFromText('SRID=4326;POINT({$geo->lat} {$geo->lon})')) ".
 							"as distance"
 						)
-					)
+					);
+					/*
 					->whereRaw(
 						"ST_DWithin(location, ST_GeographyFromText(?), ?)",
 						["SRID=4326;POINT({$geo->lat} {$geo->lon})", $geo->distance]
 					);
+					*/
 			}
 			else
 			{

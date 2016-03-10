@@ -7,6 +7,9 @@ use Symfony\Component\Yaml\Yaml;
 
 use Silex\Application;
 
+use Authority\Authority;
+
+
 require_once __DIR__ . '/../vendor/autoload.php';
 
 
@@ -54,12 +57,23 @@ $app['capsule'];
 
 
 //handling CORS preflight request
-$app->before(function (Request $request) {
+$app->before(function (Request $request, Application $app) {
+	
+	$app['user'] = $app->share(function($c) use ($app) {
+		//trigger_error("Retrieving user login for: ".$app['session']->get('user_id'));
+		return App\Model\Login::find($app['session']->get('user_id'));
+	});
+	
+	$app['authority'] = $app->share(function($c) use ($app) {
+		return new Authority($app['user']);
+	});
+	
 	if ($request->getMethod() === "OPTIONS") {
 		$response = new Response();
-		$response->headers->set("Access-Control-Allow-Origin","*");
-		$response->headers->set("Access-Control-Allow-Methods","GET,POST,PUT,DELETE,OPTIONS");
+		$response->headers->set("Access-Control-Allow-Origin",isset($_SERVER['HTTP_ORIGIN']) ? $_SERVER['HTTP_ORIGIN'] : '*');
+		$response->headers->set("Access-Control-Allow-Methods","GET,POST,PUT,DELETE,OPTIONS,PATCH");
 		$response->headers->set("Access-Control-Allow-Headers","Content-Type,X-DEVICE-ID");
+		$response->headers->set('Access-Control-Allow-Credentials','true');
 		$response->setStatusCode(200);
 		return $response;
 	}
@@ -71,14 +85,15 @@ $app->after(function (Request $req, Response $res) {
 	
 	if ($req->getMethod() != "OPTIONS")
 	{
-		$res->headers->set("Access-Control-Allow-Origin","*");
-		$res->headers->set("Access-Control-Allow-Methods","GET,POST,PUT,DELETE,OPTIONS");
+		$res->headers->set("Access-Control-Allow-Origin",isset($_SERVER['HTTP_ORIGIN']) ? $_SERVER['HTTP_ORIGIN'] : '*');
+		$res->headers->set("Access-Control-Allow-Methods","GET,POST,PUT,DELETE,OPTIONS,PATCH");
+		$res->headers->set('Access-Control-Allow-Credentials','true');
 	}
 });
 
 $app->before(function(Request $req) {
 	
-	if ($req->headers->get('Content-Type') == 'application/json')
+	if (0 === strpos($req->headers->get('Content-Type'), 'application/json'))
 	{
 		$req->request->replace(
 			$req->getContent() ?
