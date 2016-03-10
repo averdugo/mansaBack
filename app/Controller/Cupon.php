@@ -81,6 +81,63 @@ class Cupon implements ControllerProviderInterface
 			return new JsonResponse($cupon->toArray());
 		});
 		
+		$controller->patch('/{id}', function(Application $app, Request $req, $id) {
+			
+			$cupon = Model\Cupon::withExpired()->find($id);
+			if (!$app['authority.cupon']->can('update', $cupon))
+			{
+				throw new AccessDeniedHttpException('Cannot modify this cupon');
+			}
+			
+			
+			foreach (['expires_at', 'title', 'description', 'stock', 'price'] as $field)
+			{
+				if (($value = $req->get($field)) !== null)
+				{
+					if ($field == 'image_id')
+					{
+						$image = Model\Image::find($req->get('image_id'));
+						if (!$image)
+						{
+							return new NotFoundHttpException('No such image');
+						}
+						
+					}
+					
+					$cupon->{$field} = $value;
+				}
+			}
+			
+			
+			if ($req->get('image_id'))
+			{
+				$image = Model\Image::find($req->get('image_id'));
+				if (!$image)
+				{
+					return new NotFoundHttpException('No such image');
+				}
+				
+				$cupon->image()->associate($image);
+			}
+			
+			
+			$cupon->store_id	= $req->get('store_id');
+			$cupon->expires_at	= $req->get('expires_at');
+			$cupon->title		= $req->get('title');
+			$cupon->description	= $req->get('description');
+			$cupon->price		= $req->get('price');
+			$cupon->stock		= $req->get('stock');
+			
+			if (!$app['authority.cupon']->can('create', $cupon))
+			{
+				throw new AccessDeniedHttpException('Cannot create cupon (for this store)');
+			}
+			
+			
+			$cupon->save();
+			return new JsonResponse($cupon->toArray());
+		});
+		
 		$controller->get('/', function(Application $app, Request $req) {
 			
 			$db = $app['capsule']->connection();
