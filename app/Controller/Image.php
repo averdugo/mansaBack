@@ -46,7 +46,7 @@ class Image implements ControllerProviderInterface
 			$image			= new Model\Image;
 			$image->mimetype	= $img->mime();
 			$image->login_id	= $app['session']->get('user_id');
-			$image->data		= $req->getContent();
+			$image->data		= base64_encode($req->getContent());
 			$image->save();
 			
 			return new JsonResponse($image->toArray());
